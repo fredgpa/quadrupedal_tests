@@ -1,0 +1,124 @@
+<robot name="quadrupedal_robot">
+	<link name="body" />
+	<link name="left_front_shoulder" />
+	<link name="right_front_shoulder" />
+	<link name="left_back__shoulder" />
+	<link name="right_back_shoulder" />
+	<link name="left_front_leg" />
+	<link name="right_front_leg" />
+	<link name="left_back_leg" />
+	<link name="right_back_leg" />
+	<link name="left_front_elbow_ball" />
+	<link name="right_front_elbow_ball" />
+	<link name="left_back_elbow_ball" />
+	<link name="right_back_elbow_ball" />
+	<link name="left_front_calf" />
+	<link name="right_front_calf" />
+	<link name="left_back_calf" />
+	<link name="right_back_calf" />
+	<link name="left_front_foot" />
+	<link name="right_front_foot" />
+	<link name="left_back_foot" />
+	<link name="right_back_foot" />
+
+	<joint name="left_front_leg_shoulder_rotate" type="continuous">
+		<parent link="body" />
+		<child link="left_front_leg" />
+	</joint>
+
+	<joint name="right_front_leg_shoulder_rotate" type="continuous">
+		<parent link="body" />
+		<child link="right_front_leg" />
+	</joint>
+
+	<joint name="left_back_leg_shoulder_rotate" type="continuous">
+		<parent link="body" />
+		<child link="left_back_leg" />
+	</joint>
+
+	<joint name="right_back_leg_shoulder_rotate" type="continuous">
+		<parent link="body" />
+		<child link="right_back_leg" />
+	</joint>
+
+	<joint name="left_front_leg_shoulder_hinge" type="continuous">
+		<parent link="body" />
+		<child link="left_front_leg" />
+	</joint>
+
+	<joint name="right_front_leg_shoulder_hinge" type="continuous">
+		<parent link="body" />
+		<child link="right_front_leg" />
+	</joint>
+
+	<joint name="left_back_leg_shoulder_hinge" type="continuous">
+		<parent link="body" />
+		<child link="left_back_leg" />
+	</joint>
+
+	<joint name="right_back_leg_shoulder_hinge" type="continuous">
+		<parent link="body" />
+		<child link="right_back_leg" />
+	</joint>
+
+	<joint name="left_front_leg_elbow_hinge" type="continuous">
+		<parent link="left_front_leg" />
+		<child link="left_front_elbow_ball" />
+	</joint>
+
+	<joint name="right_front_leg_elbow_hinge" type="continuous">
+		<parent link="right_front_leg" />
+		<child link="right_front_elbow_ball" />
+	</joint>
+
+	<joint name="left_back_leg_elbow_hinge" type="continuous">
+		<parent link="left_back_leg" />
+		<child link="left_back_elbow_ball" />
+	</joint>
+
+	<joint name="right_back_leg_elbow_hinge" type="continuous">
+		<parent link="right_back_leg" />
+		<child link="right_back_elbow_ball" />
+	</joint>
+
+	<joint name="left_front_calf_elbow_hinge" type="continuous">
+		<parent link="left_front_elbow_ball" />
+		<child link="left_front_calf" />
+	</joint>
+
+	<joint name="right_front_calf_elbow_hinge" type="continuous">
+		<parent link="right_front_elbow_ball" />
+		<child link="right_front_calf" />
+	</joint>
+
+	<joint name="left_back_calf_elbow_hinge" type="continuous">
+		<parent link="left_back_elbow_ball" />
+		<child link="left_back_calf" />
+	</joint>
+
+	<joint name="right_back_calf_elbow_hinge" type="continuous">
+		<parent link="right_back_elbow_ball" />
+		<child link="right_back_calf" />
+	</joint>
+
+	<joint name="left_front_foot_hinge" type="continuous">
+		<parent link="left_front_calf" />
+		<child link="left_front_foot" />
+	</joint>
+
+	<joint name="right_front_foot_hinge" type="continuous">
+		<parent link="right_front_calf" />
+		<child link="right_front_foot" />
+	</joint>
+
+	<joint name="left_back_foot_hinge" type="continuous">
+		<parent link="left_back_calf" />
+		<child link="left_back_foot" />
+	</joint>
+
+	<joint name="right_back_foot_hinge" type="continuous">
+		<parent link="right_back_calf" />
+		<child link="right_back_foot" />
+	</joint>
+
+</robot>

@@ -408,7 +408,7 @@
 
 	<link name="left_front_foot" >
 		<visual>
-			<origin xyz="0 0 -.05" rpy="0 0 0"/>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
 				<sphere radius=".1" />
 			</geometry>
@@ -416,7 +416,7 @@
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -.05" rpy="0 0 0"/>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
 				<sphere radius=".1" />
 			</geometry>
@@ -431,7 +431,7 @@
 
 	<link name="right_front_foot" >
 		<visual>
-			<origin xyz="0 0 -.05" rpy="0 0 0"/>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
 				<sphere radius=".1" />
 			</geometry>
@@ -439,7 +439,7 @@
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -.05" rpy="0 0 0"/>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
 				<sphere radius=".1" />
 			</geometry>
@@ -454,7 +454,7 @@
 
 	<link name="left_back_foot" >
 		<visual>
-			<origin xyz="0 0 -.05" rpy="0 0 0"/>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
 				<sphere radius=".1" />
 			</geometry>
@@ -462,7 +462,7 @@
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -.05" rpy="0 0 0"/>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
 				<sphere radius=".1" />
 			</geometry>
@@ -477,7 +477,7 @@
 
 	<link name="right_back_foot" >
 		<visual>
-			<origin xyz="0 0 -.05" rpy="0 0 0"/>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
 				<sphere radius=".1" />
 			</geometry>
@@ -485,7 +485,7 @@
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -.05" rpy="0 0 0"/>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
 				<sphere radius=".1" />
 			</geometry>

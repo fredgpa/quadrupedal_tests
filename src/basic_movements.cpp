@@ -24,5 +24,4 @@ int main(int argc, char** argV){
 	ros::Subscriber sub = node.subscribe(turtle_name+"/pose", 10, &poseCallback);
 
 	ros::spin();
-	return 0;
 }

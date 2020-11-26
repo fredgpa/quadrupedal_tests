@@ -671,4 +671,186 @@
 		<child link="right_back_foot" />
 	</joint>
 
+	<transmission name="left_front_leg_shoulder_rotate_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_front_leg_shoulder_rotate">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_front_leg_shoulder_rotate_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_front_leg_shoulder_rotate_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_front_leg_shoulder_rotate">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_front_leg_shoulder_rotate_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_back_leg_shoulder_rotate_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_back_leg_shoulder_rotate">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_back_leg_shoulder_rotate_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_back_leg_shoulder_rotate_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_back_leg_shoulder_rotate">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_back_leg_shoulder_rotate_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_front_leg_shoulder_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_front_leg_shoulder_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_front_leg_shoulder_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_front_leg_shoulder_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_front_leg_shoulder_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_front_leg_shoulder_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_back_leg_shoulder_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_back_leg_shoulder_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_back_leg_shoulder_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_back_leg_shoulder_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_back_leg_shoulder_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_back_leg_shoulder_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_front_leg_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_front_leg_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_front_leg_elbow_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_front_leg_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_front_leg_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_front_leg_elbow_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_back_leg_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_back_leg_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_back_leg_elbow_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_back_leg_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_back_leg_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_back_leg_elbow_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_front_calf_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_front_calf_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_front_calf_elbow_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_front_calf_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_front_calf_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_front_calf_elbow_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_back_calf_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_back_calf_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_back_calf_elbow_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_back_calf_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_back_calf_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_back_calf_elbow_hinge_motor">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<gazebo>
+		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+			<robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+		</plugin>
+	</gazebo>
+
 </robot>

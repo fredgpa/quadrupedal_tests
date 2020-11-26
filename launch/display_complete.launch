@@ -1,39 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <launch>
         <!-- overwriting these args -->
+        <arg name="debug" default="false" />
         <arg name="gui" default="true" />
-        <arg name="model" default="model.urdf" />
+        <arg name="paused" default="false" />
+        <arg name="use_sim_time" default="true" />
+        <arg name="headless" default="false" />
+        <arg name="model" default="model.urdf"/>
 
-        <!-- include gazebo_ros launcher -->
-        
-        <!--
+        <!-- include gazebo_ros launcher -->        
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
-                <arg name="world_name" value="$(arg world)" />
+                <arg name="headless" value="$(arg headless)" />
                 <arg name="debug" value="$(arg debug)" />
                 <arg name="gui" value="$(arg gui)" />
-                <arg name="paused" value="$(arg pause)" />
+                <arg name="paused" value="$(arg paused)" />
                 <arg name="use_sim_time" value="true" />
         </include>
-        -->
+        
         
         <!-- set parameters -->
         <param name="robot_description" textfile="$(find quadrupedal_tests)/urdf/$(arg model)" />
 
-        <include file="$(find quadrupedal_tests)/launch/display.launch">
-                <param name="model" value="$(arg model)" />
-        </include>
-        <!--
-        <node name="RobotLeg" pkg="quadrupedal_tests" type="RobotLeg" output="screen" /> -->
+        <!-- start urdf spawner -->
+        <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-x 0 -y 0 -z 5 -unpause -urdf -model robot -param robot_description" respawn="false" output="screen" />
+
         <!-- start joint_state_publisher, robot_state_publisher, rviz-->
-
-
-        
         <node if="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
         <node unless="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /> 
 
-        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
+                <param name="publish_frequency" type="double" value="30.0" />
+        </node>
 
-        
         <node name="rviz" pkg="rviz" type="rviz" args="-d $(find quadrupedal_tests)/rviz/urdf.rviz" required="true" />
         
 </launch>

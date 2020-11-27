@@ -7,6 +7,8 @@
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
 
+#define PI 3.14159
+#define RATE 30
 
 //namespace quadrupedal_test{
 //}
@@ -53,6 +55,59 @@ void jointCallback(const sensor_msgs::JointState::ConstPtr &_js){
 	}
 }
 
+void freeze(sensor_msgs::JointState jointState, std::vector<ros::Publisher> jointPub){
+
+	if(jointState.header.seq != 0){
+		for(int i = 0; i < nJoints; i++){			
+			
+		//	//std::cout << "quadrupedal_test/" + initialState.name[i] + "_controller/command" << std::endl;
+
+			std_msgs::Float64 msg;
+			msg.data = initialState.position[i];
+			//msg.data = 1.5;
+			jointPub[i].publish(msg);
+		}
+	}
+
+}
+
+void crouch(sensor_msgs::JointState jointState, std::vector<ros::Publisher> jointPub, int duration){
+	if(jointState.header.seq != 0){
+
+		double steps = duration * RATE;
+		double diff;
+		std_msgs::Float64 newPos;
+
+		for(int i = 0; i < nJoints; i++){
+			if(jointState.name[i].find("_shoulder_hinge")){
+				diff = 0 - jointState.position[i];
+			}else if(jointState.name[i].find("_shoulder_rotate")){
+				diff = -PI/4 - jointState.position[i];
+			}else if(jointState.name[i].find("_leg_elbow")){
+				diff = PI/4 - jointState.position[i];
+			}else if(jointState.name[i].find("_calf_elbow")){
+				diff = PI/4 - jointState.position[i];
+			}
+
+			newPos.data = jointState.position[i] + diff/steps;
+
+			jointPub[i].publish(newPos);
+		}
+
+		
+
+	}
+}
+
+void printJointState(sensor_msgs::JointState jointState){
+	if(jointState.header.seq != 0)
+		for(int i = 0; i < nJoints; i++){
+			std::cout << "-------" <<std::endl;
+			std::cout << jointState.name[i] <<std::endl;
+			std::cout << jointState.position[i] <<std::endl;
+		}
+}
+
 int main(int argc, char** argv){
 
 	ros::init(argc, argv, "controllerTesting");
@@ -65,7 +120,7 @@ int main(int argc, char** argv){
 		jointPub[i] = n.advertise<std_msgs::Float64>("/quadrupedal_test/" + jointName[i] + "_controller/command", 5);
 	
 	ros::Subscriber sub = n.subscribe("/quadrupedal_test/joint_states", 1, jointCallback);
-	ros::Rate r(30);
+	ros::Rate r(RATE);
 	
 	jointState.name.resize(nJoints);
 	jointState.position.resize(nJoints);
@@ -78,22 +133,16 @@ int main(int argc, char** argv){
 	// std::cout << initialState.header.seq << std::endl;
 	//std::cout << "quadrupedal_test/" + initialState.name[i] + "_controller/command" << std::endl;
 	//command to be publisherd
-	std_msgs::Float64 msg;
+	
 	//std::vector<double> msg(4, 0.0);
 
 	//std::vector
-
+	
 	while(ros::ok()){
-		if(initialState.header.seq != 0){
-			for(int i = 0; i < nJoints; i++){			
-				
-			//	//std::cout << "quadrupedal_test/" + initialState.name[i] + "_controller/command" << std::endl;
 
-				msg.data = initialState.position[i];
-				//msg.data = 1.5;
-				jointPub[i].publish(msg);
-			}
-		}
+		//crouch(jointState, jointPub, 3);
+
+		freeze(jointState, jointPub);
 
 		ros::spinOnce();
 	}

@@ -1,4 +1,4 @@
-quadrupedal_robot:
+quadrupedal_test:
   #publish joint states
 
   joint_state_controller:

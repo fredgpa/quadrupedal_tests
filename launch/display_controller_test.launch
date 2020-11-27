@@ -22,11 +22,11 @@
         <param name="robot_description" textfile="$(find quadrupedal_tests)/urdf/$(arg model)" />
 
         <!-- start urdf spawner -->
-        <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-x 0 -y 0 -z 5 -unpause -urdf -model robot -param robot_description" respawn="false" output="screen" />
+        <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-x 0 -y 0 -z 5 -unpause -urdf -model quadrupedal_robot -param robot_description" respawn="false" output="screen" />
 
         <rosparam file="$(find quadrupedal_tests)/config/quadrupedal_control.yaml" command="load" />
 
-        <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
+        <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  ns="/quadrupedal_test"
         args="left_front_leg_shoulder_rotate_controller right_front_leg_shoulder_rotate_controller left_back_leg_shoulder_rotate_controller right_back_leg_shoulder_rotate_controller left_front_leg_shoulder_hinge_controller right_front_leg_shoulder_hinge_controller left_back_leg_shoulder_hinge_controller right_back_leg_shoulder_hinge_controller left_front_leg_elbow_hinge_controller right_front_leg_elbow_hinge_controller
         left_back_leg_elbow_hinge_controller right_back_leg_elbow_hinge_controller
         left_front_calf_elbow_hinge_controller right_front_calf_elbow_hinge_controller
@@ -35,10 +35,12 @@
 
         <!-- start joint_state_publisher, robot_state_publisher, rviz-->
 
-        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ns="/quadrupedal_test" />
+
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" ns="/quadrupedal_test" >
                 <param name="publish_frequency" type="double" value="30.0" />
         </node>
 
-        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find quadrupedal_tests)/rviz/urdf.rviz" required="true" />
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find quadrupedal_tests)/rviz/urdf.rviz" required="true" ns="/quadrupedal_test" />
         
 </launch>

@@ -35,7 +35,7 @@
 
         <!-- start joint_state_publisher, robot_state_publisher, rviz-->
 
-        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ns="/quadrupedal_test" />
+        <!--<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ns="/quadrupedal_test" />-->
 
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" ns="/quadrupedal_test" >
                 <param name="publish_frequency" type="double" value="30.0" />

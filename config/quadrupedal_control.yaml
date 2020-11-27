@@ -7,84 +7,84 @@ quadrupedal_test:
 
   #position controllers
   left_front_leg_shoulder_rotate_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: left_front_leg_shoulder_rotate
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   right_front_leg_shoulder_rotate_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: right_front_leg_shoulder_rotate
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   left_back_leg_shoulder_rotate_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: left_back_leg_shoulder_rotate
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   right_back_leg_shoulder_rotate_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: right_back_leg_shoulder_rotate
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   left_front_leg_shoulder_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: left_front_leg_shoulder_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   right_front_leg_shoulder_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: right_front_leg_shoulder_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   left_back_leg_shoulder_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: left_back_leg_shoulder_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   right_back_leg_shoulder_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: right_back_leg_shoulder_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   left_front_leg_elbow_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: left_front_leg_elbow_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   right_front_leg_elbow_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: right_front_leg_elbow_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   left_back_leg_elbow_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: left_back_leg_elbow_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   right_back_leg_elbow_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: right_back_leg_elbow_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   left_front_calf_elbow_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: left_front_calf_elbow_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   right_front_calf_elbow_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: right_front_calf_elbow_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   left_back_calf_elbow_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: left_back_calf_elbow_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   right_back_calf_elbow_hinge_controller:
-    type: effort_controllers/JointPositionController
+    type: my_controller/MyPositionController
     joint: right_back_calf_elbow_hinge
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    gain: 500
 
   
 

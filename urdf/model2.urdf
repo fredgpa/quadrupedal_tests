@@ -1,6 +1,6 @@
 <?xml version="1.4"?>
 <robot name="quadrupedal_robot">
-	
+
 	<material name="blue">
 		<color rgba="0 0 .8 1" />
 	</material>
@@ -19,7 +19,7 @@
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
-				<box size="4 1.5 .5" />
+				<box size="1 0.4 .2" />
 			</geometry>
 			<material name="white" />
 		</visual>
@@ -27,7 +27,7 @@
 		<collision>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
-				<box size="4 1.5 .5" />
+				<box size="1 0.4 .2" />
 			</geometry>
 		</collision>
 
@@ -40,17 +40,17 @@
 
 	<link name="left_front_shoulder" >
 		<visual>
-			<origin xyz="0 .025 0" rpy="1.57 0 0"/>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length=".05" />
+				<cylinder radius=".05" length=".1" />
 			</geometry>
 			<material name="blue" />
 		</visual>
 
 		<collision>
-			<origin xyz="1.5 .775 0" rpy="1.57 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length=".05" />
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
 			</geometry>
 		</collision>
 
@@ -63,18 +63,19 @@
 
 	<link name="right_front_shoulder">
 		<visual>
-			<origin xyz="0 -.025 0" rpy="1.57 0 0"/>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length=".05" />
+				<cylinder radius=".05" length=".1" />
 			</geometry>
 			<material name="blue" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 -.25 0" rpy="1.57 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length=".05" />
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
 			</geometry>
+			<material name="blue" />
 		</collision>
 
 		<inertial>
@@ -86,17 +87,17 @@
 
 	<link name="left_back_shoulder">
 		<visual>
-			<origin xyz="0 .025 0" rpy="1.57 0 0"/>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length=".05" />
+				<cylinder radius=".05" length=".1" />
 			</geometry>
 			<material name="blue" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 .025 0" rpy="1.57 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length=".05" />
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
 			</geometry>
 		</collision>
 
@@ -109,17 +110,17 @@
 
 	<link name="right_back_shoulder">
 		<visual>
-			<origin xyz="0 -.025 0" rpy="1.57 0 0"/>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length=".05" />
+				<cylinder radius=".05" length=".1" />
 			</geometry>
 			<material name="blue" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 -.025 0" rpy="1.57 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length=".05" />
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
 			</geometry>
 		</collision>
 
@@ -132,17 +133,17 @@
 
 	<link name="left_front_leg" >
 		<visual>
-			<origin xyz="0 0 -.9" rpy="0 0 0"/>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length="2" />
+				<cylinder radius=".05" length="0.4" />
 			</geometry>
 			<material name="red" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -.9" rpy="0 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length="2" />
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
 			</geometry>
 		</collision>
 
@@ -155,17 +156,17 @@
 
 	<link name="right_front_leg" >
 		<visual>
-			<origin xyz="0 0 -.9" rpy="0 0 0"/>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length="2" />
+				<cylinder radius=".05" length="0.4" />
 			</geometry>
 			<material name="red" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -.9" rpy="0 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length="2" />
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
 			</geometry>
 		</collision>
 
@@ -178,17 +179,17 @@
 
 	<link name="left_back_leg" >
 		<visual>
-			<origin xyz="0 0 -.9" rpy="0 0 0"/>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length="2" />
+				<cylinder radius=".05" length="0.4" />
 			</geometry>
 			<material name="red" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -.9" rpy="0 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length="2" />
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
 			</geometry>
 		</collision>
 
@@ -201,17 +202,17 @@
 
 	<link name="right_back_leg" >
 		<visual>
-			<origin xyz="0 0 -.9" rpy="0 0 0"/>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length="2" />
+				<cylinder radius=".05" length="0.4" />
 			</geometry>
 			<material name="red" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -.9" rpy="0 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length="2" />
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
 			</geometry>
 		</collision>
 
@@ -222,111 +223,19 @@
 		</inertial>
 	</link>
 
-	<link name="left_front_elbow_ball" >
-		<visual>
-			<origin xyz="0 0 -.1" rpy="0 0 0"/>
-			<geometry>				
-				<sphere radius=".1" />
-			</geometry>
-			<material name="white" />
-		</visual>
-
-		<collision>
-			<origin xyz="0 0 -.1" rpy="0 0 0"/>
-			<geometry>
-				<sphere radius=".1" />
-			</geometry>
-		</collision>
-
-		<inertial>
-			<mass value=".75" />
-
-			<inertia ixx=".003" ixy="0" ixz="0" iyy=".003" iyz="0" izz=".003" />
-		</inertial>
-	</link>
-
-	<link name="right_front_elbow_ball" >
-		<visual>
-			<origin xyz="0 0 -.1" rpy="0 0 0"/>
-			<geometry>				
-				<sphere radius=".1" />
-			</geometry>
-			<material name="white" />
-		</visual>
-
-		<collision>
-			<origin xyz="0 0 -.1" rpy="0 0 0"/>
-			<geometry>
-				<sphere radius=".1" />
-			</geometry>
-		</collision>
-
-		<inertial>
-			<mass value=".75" />
-
-			<inertia ixx=".003" ixy="0" ixz="0" iyy=".003" iyz="0" izz=".003" />
-		</inertial>
-	</link>
-
-	<link name="left_back_elbow_ball" >
-		<visual>
-			<origin xyz="0 0 -.1" rpy="0 0 0"/>
-			<geometry>				
-				<sphere radius=".1" />
-			</geometry>
-			<material name="white" />
-		</visual>
-
-		<collision>
-			<origin xyz="0 0 -.1" rpy="0 0 0"/>
-			<geometry>
-				<sphere radius=".1" />
-			</geometry>
-		</collision>
-
-		<inertial>
-			<mass value=".75" />
-
-			<inertia ixx=".003" ixy="0" ixz="0" iyy=".003" iyz="0" izz=".003" />
-		</inertial>
-	</link>
-
-	<link name="right_back_elbow_ball" >
-		<visual>
-			<origin xyz="0 0 -.1" rpy="0 0 0"/>
-			<geometry>				
-				<sphere radius=".1" />
-			</geometry>
-			<material name="white" />
-		</visual>
-
-		<collision>
-			<origin xyz="0 0 -.1" rpy="0 0 0"/>
-			<geometry>
-				<sphere radius=".1" />
-			</geometry>
-		</collision>
-
-		<inertial>
-			<mass value=".75" />
-
-			<inertia ixx=".003" ixy="0" ixz="0" iyy=".003" iyz="0" izz=".003" />
-		</inertial>
-	</link>
-
 	<link name="left_front_calf" >
 		<visual>
-			<origin xyz="0 0 -1" rpy="0 0 0"/>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length="2" />
+				<cylinder radius=".05" length="0.35" />
 			</geometry>
 			<material name="red" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -1" rpy="0 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length="2" />
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
 			</geometry>
 		</collision>
 
@@ -339,17 +248,17 @@
 
 	<link name="right_front_calf" >
 		<visual>
-			<origin xyz="0 0 -1" rpy="0 0 0"/>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length="2" />
+				<cylinder radius=".05" length="0.35" />
 			</geometry>
 			<material name="red" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -1" rpy="0 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length="2" />
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
 			</geometry>
 		</collision>
 
@@ -362,17 +271,17 @@
 
 	<link name="left_back_calf" >
 		<visual>
-			<origin xyz="0 0 -1" rpy="0 0 0"/>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length="2" />
+				<cylinder radius=".05" length="0.35" />
 			</geometry>
 			<material name="red" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -1" rpy="0 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length="2" />
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
 			</geometry>
 		</collision>
 
@@ -385,17 +294,17 @@
 
 	<link name="right_back_calf" >
 		<visual>
-			<origin xyz="0 0 -1" rpy="0 0 0"/>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
 			<geometry>				
-				<cylinder radius=".1" length="2" />
+				<cylinder radius=".05" length="0.35" />
 			</geometry>
 			<material name="red" />
 		</visual>
 
 		<collision>
-			<origin xyz="0 0 -1" rpy="0 0 0"/>
-			<geometry>
-				<cylinder radius=".1" length="2" />
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
 			</geometry>
 		</collision>
 
@@ -410,7 +319,7 @@
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
-				<sphere radius=".1" />
+				<sphere radius=".05" />
 			</geometry>
 			<material name="white" />
 		</visual>
@@ -418,7 +327,7 @@
 		<collision>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
-				<sphere radius=".1" />
+				<sphere radius=".05" />
 			</geometry>
 		</collision>
 
@@ -433,7 +342,7 @@
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
-				<sphere radius=".1" />
+				<sphere radius=".05" />
 			</geometry>
 			<material name="white" />
 		</visual>
@@ -441,7 +350,7 @@
 		<collision>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
-				<sphere radius=".1" />
+				<sphere radius=".05" />
 			</geometry>
 		</collision>
 
@@ -456,7 +365,7 @@
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
-				<sphere radius=".1" />
+				<sphere radius=".05" />
 			</geometry>
 			<material name="white" />
 		</visual>
@@ -464,7 +373,7 @@
 		<collision>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
-				<sphere radius=".1" />
+				<sphere radius=".05" />
 			</geometry>
 		</collision>
 
@@ -479,7 +388,7 @@
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>				
-				<sphere radius=".1" />
+				<sphere radius=".05" />
 			</geometry>
 			<material name="white" />
 		</visual>
@@ -487,7 +396,7 @@
 		<collision>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
-				<sphere radius=".1" />
+				<sphere radius=".05" />
 			</geometry>
 		</collision>
 
@@ -503,170 +412,134 @@
 		<child link="base_link" />
 	</joint>
 
-	<joint name="left_front_leg_shoulder_rotate" type="revolute">
-		<origin xyz="1.5 .75 0" rpy="0 0 0"/>
+	<joint name="left_front_leg_shoulder_hinge" type="revolute">
+		<origin xyz="0.5 .2 0" rpy="1.57 0 -1.57"/>
 		<parent link="base_link" />
 		<child link="left_front_shoulder" />
-		<axis xyz="0 1 0" />
+		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="1000" velocity="1" />
-	</joint>
-
-	<joint name="right_front_leg_shoulder_rotate" type="revolute">
-		<origin xyz="1.5 -.75 0" rpy="0 0 0"/>
-		<parent link="base_link" />
-		<child link="right_front_shoulder" />
-		<axis xyz="0 1 0" />
-
-		<limit lower="-1.57" upper="1.57" effort="1000" velocity="1" />
-	</joint>
-
-	<joint name="left_back_leg_shoulder_rotate" type="revolute">
-		<origin xyz="-1.5 .75 0" rpy="0 0 0"/>
-		<parent link="base_link" />
-		<child link="left_back_shoulder" />
-		<axis xyz="0 1 0" />
-
-		<limit lower="-1.57" upper="1.57" effort="1000" velocity="1" />
-	</joint>
-
-	<joint name="right_back_leg_shoulder_rotate" type="revolute">
-		<origin xyz="-1.5 -.75 0" rpy="0 0 0"/>
-		<parent link="base_link" />
-		<child link="right_back_shoulder" />
-		<axis xyz="0 1 0" />
-
-		<limit lower="-1.57" upper="1.57" effort="1000" velocity="1" />
-	</joint>
-
-	<joint name="left_front_leg_shoulder_hinge" type="revolute">
-		<origin xyz="0 .125 0" rpy="0 0 0"/>
-		<parent link="left_front_shoulder" />
-		<child link="left_front_leg" />
-		<axis xyz="1 0 0" />
-
-		<limit lower="-.52" upper="1.57" effort="1000" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
 	</joint>
 
 	<joint name="right_front_leg_shoulder_hinge" type="revolute">
-		<origin xyz="0 -.125 0" rpy="0 0 0"/>
-		<parent link="right_front_shoulder" />
-		<child link="right_front_leg" />
-		<axis xyz="1 0 0" />
+		<origin xyz="0.5 -.2 0" rpy="1.57 0 1.57"/>
+		<parent link="base_link" />
+		<child link="right_front_shoulder" />
+		<axis xyz="0 0 1" />
 
-		<limit lower="-.52" upper="1.57" effort="1000" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
 	</joint>
 
 	<joint name="left_back_leg_shoulder_hinge" type="revolute">
-		<origin xyz="0 .125 0" rpy="0 0 0"/>
-		<parent link="left_back_shoulder" />
-		<child link="left_back_leg" />
-		<axis xyz="1 0 0" />
+		<origin xyz="-0.5 .2 0" rpy="1.57 0 -1.57"/>
+		<parent link="base_link" />
+		<child link="left_back_shoulder" />
+		<axis xyz="0 0 1" />
 
-		<limit lower="-.52" upper="1.57" effort="1000" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
 	</joint>
 
 	<joint name="right_back_leg_shoulder_hinge" type="revolute">
-		<origin xyz="0 -.125 0" rpy="0 0 0"/>
+		<origin xyz="-0.5 -.2 0" rpy="1.57 0 1.57"/>
+		<parent link="base_link" />
+		<child link="right_back_shoulder" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="left_front_leg_shoulder_rotate" type="revolute">
+		<origin xyz="-.1 0 0" rpy="1.57 0 -1.57"/>
+		<parent link="left_front_shoulder" />
+		<child link="left_front_leg" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="right_front_leg_shoulder_rotate" type="revolute">
+		<origin xyz="-.1 0 0" rpy="1.57 0 -1.57"/>
+		<parent link="right_front_shoulder" />
+		<child link="right_front_leg" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="left_back_leg_shoulder_rotate" type="revolute">
+		<origin xyz="-.1 0 0" rpy="1.57 0 -1.57"/>
+		<parent link="left_back_shoulder" />
+		<child link="left_back_leg" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="right_back_leg_shoulder_rotate" type="revolute">
+		<origin xyz="-.1 0 0" rpy="1.57 0 -1.57"/>
 		<parent link="right_back_shoulder" />
 		<child link="right_back_leg" />
-		<axis xyz="1 0 0" />
+		<axis xyz="0 0 1" />
 
-		<limit lower="-.52" upper="1.57" effort="1000" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
 	</joint>
 
 	<joint name="left_front_leg_elbow_hinge" type="revolute">
-		<origin xyz="0 0 -1.9" rpy="0 0 0" />
+		<origin xyz="0.4 0 0" rpy="0 0 0" />
 		<parent link="left_front_leg" />
-		<child link="left_front_elbow_ball" />
-		<axis xyz="0 1 0" />
+		<child link="left_front_calf" />
+		<axis xyz="0 0 1" />
 
-		<limit lower="-.79" upper=".79" effort="1000" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
 	</joint>
 
 	<joint name="right_front_leg_elbow_hinge" type="revolute">
-		<origin xyz="0 0 -1.9" rpy="0 0 0" />
+		<origin xyz="0.4 0 0" rpy="0 0 0" />
 		<parent link="right_front_leg" />
-		<child link="right_front_elbow_ball" />
-		<axis xyz="0 1 0" />
+		<child link="right_front_calf" />
+		<axis xyz="0 0 1" />
 
-		<limit lower="-.79" upper=".79" effort="1000" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
 	</joint>
 
 	<joint name="left_back_leg_elbow_hinge" type="revolute">
-		<origin xyz="0 0 -1.9" rpy="0 0 0" />
+		<origin xyz="0.4 0 0" rpy="0 0 0" />
 		<parent link="left_back_leg" />
-		<child link="left_back_elbow_ball" />
-		<axis xyz="0 1 0" />
+		<child link="left_back_calf" />
+		<axis xyz="0 0 1" />
 
-		<limit lower="-.79" upper=".79" effort="1000" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
 	</joint>
 
 	<joint name="right_back_leg_elbow_hinge" type="revolute">
-		<origin xyz="0 0 -1.9" rpy="0 0 0" />
+		<origin xyz="0.4 0 0" rpy="0 0 0" />
 		<parent link="right_back_leg" />
-		<child link="right_back_elbow_ball" />
-		<axis xyz="0 1 0" />
-
-		<limit lower="-.79" upper=".79" effort="1000" velocity="1" />
-	</joint>
-
-	<joint name="left_front_calf_elbow_hinge" type="revolute">
-		<origin xyz="0 0 -.2" rpy="0 0 0" />
-		<parent link="left_front_elbow_ball" />
-		<child link="left_front_calf" />
-		<axis xyz="0 1 0" />
-
-		<limit lower="-.79" upper=".79" effort="1000" velocity="1" />
-	</joint>
-
-	<joint name="right_front_calf_elbow_hinge" type="revolute">
-		<origin xyz="0 0 -.2" rpy="0 0 0" />
-		<parent link="right_front_elbow_ball" />
-		<child link="right_front_calf" />
-		<axis xyz="0 1 0" />
-
-		<limit lower="-.79" upper=".79" effort="1000" velocity="1" />
-	</joint>
-
-	<joint name="left_back_calf_elbow_hinge" type="revolute">
-		<origin xyz="0 0 -.2" rpy="0 0 0" />
-		<parent link="left_back_elbow_ball" />
-		<child link="left_back_calf" />
-		<axis xyz="0 1 0" />
-
-		<limit lower="-.79" upper=".79" effort="1000" velocity="1" />
-	</joint>
-
-	<joint name="right_back_calf_elbow_hinge" type="revolute">
-		<origin xyz="0 0 -.2" rpy="0 0 0" />
-		<parent link="right_back_elbow_ball" />
 		<child link="right_back_calf" />
-		<axis xyz="0 1 0" />
+		<axis xyz="0 0 1" />
 
-		<limit lower="-.79" upper=".79" effort="1000" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
 	</joint>
 
 	<joint name="left_front_foot_hinge" type="fixed">
-		<origin xyz="0 0 -2" rpy="0 0 0" />
+		<origin xyz="0.35 0 0" rpy="0 0 0" />
 		<parent link="left_front_calf" />
 		<child link="left_front_foot" />
 	</joint>
 
 	<joint name="right_front_foot_hinge" type="fixed">
-		<origin xyz="0 0 -2" rpy="0 0 0" />
+		<origin xyz="0.35 0 0" rpy="0 0 0" />
 		<parent link="right_front_calf" />
 		<child link="right_front_foot" />
 	</joint>
 
 	<joint name="left_back_foot_hinge" type="fixed">
-		<origin xyz="0 0 -2" rpy="0 0 0" />
+		<origin xyz="0.35 0 0" rpy="0 0 0" />
 		<parent link="left_back_calf" />
 		<child link="left_back_foot" />
 	</joint>
 
 	<joint name="right_back_foot_hinge" type="fixed">
-		<origin xyz="0 0 -2" rpy="0 0 0" />
+		<origin xyz="0.35 0 0" rpy="0 0 0" />
 		<parent link="right_back_calf" />
 		<child link="right_back_foot" />
 	</joint>
@@ -787,46 +660,6 @@
 			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
 		</joint>
 		<actuator name="right_back_leg_elbow_hinge_motor">
-			<mechanicalReduction>1</mechanicalReduction>
-		</actuator>
-	</transmission>
-
-	<transmission name="left_front_calf_elbow_hinge_transmission">
-		<type>transmission_interface/SimpleTransmission</type>
-		<joint name="left_front_calf_elbow_hinge">
-			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-		</joint>
-		<actuator name="left_front_calf_elbow_hinge_motor">
-			<mechanicalReduction>1</mechanicalReduction>
-		</actuator>
-	</transmission>
-
-	<transmission name="right_front_calf_elbow_hinge_transmission">
-		<type>transmission_interface/SimpleTransmission</type>
-		<joint name="right_front_calf_elbow_hinge">
-			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-		</joint>
-		<actuator name="right_front_calf_elbow_hinge_motor">
-			<mechanicalReduction>1</mechanicalReduction>
-		</actuator>
-	</transmission>
-
-	<transmission name="left_back_calf_elbow_hinge_transmission">
-		<type>transmission_interface/SimpleTransmission</type>
-		<joint name="left_back_calf_elbow_hinge">
-			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-		</joint>
-		<actuator name="left_back_calf_elbow_hinge_motor">
-			<mechanicalReduction>1</mechanicalReduction>
-		</actuator>
-	</transmission>
-
-	<transmission name="right_back_calf_elbow_hinge_transmission">
-		<type>transmission_interface/SimpleTransmission</type>
-		<joint name="right_back_calf_elbow_hinge">
-			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-		</joint>
-		<actuator name="right_back_calf_elbow_hinge_motor">
 			<mechanicalReduction>1</mechanicalReduction>
 		</actuator>
 	</transmission>

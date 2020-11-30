@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <launch>
+
+        <!--<rosparam name="use_sim_time" value="true" />-->
+
         <!-- overwriting these args -->
         <arg name="debug" default="false" />
         <arg name="gui" default="true" />
         <arg name="paused" default="false" />
         <arg name="use_sim_time" default="true" />
         <arg name="headless" default="false" />
-        <arg name="model" default="model.urdf"/>
+        <arg name="model" default="model2.urdf"/>
 
         <!-- include gazebo_ros launcher -->        
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -22,15 +25,13 @@
         <param name="robot_description" textfile="$(find quadrupedal_tests)/urdf/$(arg model)" />
 
         <!-- start urdf spawner -->
-        <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-x 0 -y 0 -z 5 -unpause -urdf -model quadrupedal_robot -param robot_description" respawn="false" output="screen" />
+        <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-x 0 -y 0 -z 1 -unpause -urdf -model quadrupedal_robot -param robot_description" respawn="false" output="screen" />
 
         <rosparam file="$(find quadrupedal_tests)/config/quadrupedal_control.yaml" command="load" />
 
         <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  ns="/quadrupedal_test"
         args="left_front_leg_shoulder_rotate_controller right_front_leg_shoulder_rotate_controller left_back_leg_shoulder_rotate_controller right_back_leg_shoulder_rotate_controller left_front_leg_shoulder_hinge_controller right_front_leg_shoulder_hinge_controller left_back_leg_shoulder_hinge_controller right_back_leg_shoulder_hinge_controller left_front_leg_elbow_hinge_controller right_front_leg_elbow_hinge_controller
-        left_back_leg_elbow_hinge_controller right_back_leg_elbow_hinge_controller
-        left_front_calf_elbow_hinge_controller right_front_calf_elbow_hinge_controller
-        left_back_calf_elbow_hinge_controller right_back_calf_elbow_hinge_controller
+        left_back_leg_elbow_hinge_controller right_back_leg_elbow_hinge_controller        
         joint_state_controller" />
 
         <!-- start joint_state_publisher, robot_state_publisher, rviz-->

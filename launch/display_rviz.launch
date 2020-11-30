@@ -2,7 +2,7 @@
 <launch>
         <!-- overwriting these args -->
         <arg name="gui" default="true" />
-        <arg name="model" default="model.urdf" />
+        <arg name="model" default="model2.urdf" />
         
         <!-- set parameters -->
         <param name="robot_description" textfile="$(find quadrupedal_tests)/urdf/$(arg model)" />

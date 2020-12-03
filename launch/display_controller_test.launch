@@ -25,7 +25,7 @@
         <param name="robot_description" textfile="$(find quadrupedal_tests)/urdf/$(arg model)" />
 
         <!-- start urdf spawner -->
-        <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-x 0 -y 0 -z 1 -unpause -urdf -model quadrupedal_robot -param robot_description" respawn="false" output="screen" />
+        <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-x 0 -y 0 -z .8 -unpause -urdf -model quadrupedal_robot -param robot_description" respawn="false" output="screen" />
 
         <rosparam file="$(find quadrupedal_tests)/config/quadrupedal_control.yaml" command="load" />
 

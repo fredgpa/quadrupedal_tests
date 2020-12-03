@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <opencv2/core.hpp>
+#include <armadillo>
 
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
@@ -22,7 +24,7 @@ static const float bodyLength = 1;
 static const float bodyWidth = .4;
 static const float shoulderLength = .1;
 static const float legLength = .4;
-static const float calfLength = .35;
+static const float calfLength = .4;
 static const float weight = 100;
 
 //
@@ -30,8 +32,8 @@ static const float omega = 0;
 static const float phi = 0;
 static const float psi = 0;
 static const float xm = 0;
-static const float ym = .5;
-static const float zm = 0;
+static const float ym = 0;
+static const float zm = .8;
 
 
 //joint names
@@ -151,7 +153,7 @@ std::vector<float> cross(std::vector<float> v1, std::vector<float> v2){
 	matrix[1] = v1;
 	matrix[2] = v2;
 
-	vector = {(matrix[1][1]*matrix[2][2] - matrix[1][2]*matrix[2][1]), (matrix[1][2]*matrix[2][1] - matrix[1][0]*matrix[2][2]), (matrix[1][0]*matrix[2][1] - matrix[1][1]*matrix[2][0])};
+	vector = {(matrix[1][1]*matrix[2][2] - matrix[1][2]*matrix[2][1]), (matrix[1][2]*matrix[2][0] - matrix[1][0]*matrix[2][2]), (matrix[1][0]*matrix[2][1] - matrix[1][1]*matrix[2][0])};
 
 	return vector;
 }
@@ -184,6 +186,45 @@ std::vector<float> calculateTheta(std::string type, sensor_msgs::JointState join
 	return theta;
 }
 
+sensor_msgs::JointState insertTheta(std::vector<float> theta, sensor_msgs::JointState jointState_, std::string leg){
+
+	for(int i = 0; i < jointName.size(); i++){
+		if(jointState_.name[i].find(leg) != std::string::npos){
+			if(jointState_.name[i].find("shoulder_rotate") != std::string::npos)
+				jointState.position[i] = theta[0];
+			else if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
+				jointState.position[i] = theta[1];
+			else if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
+				jointState.position[i] = theta[2];
+		}else if(jointState_.name[i].find(leg) != std::string::npos){
+			if(jointState_.name[i].find("shoulder_rotate") != std::string::npos)
+				jointState.position[i] = theta[0];
+			else if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
+				jointState.position[i] = theta[1];
+			else if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
+				jointState.position[i] = theta[2];
+		}else if(jointState_.name[i].find(leg) != std::string::npos){
+			if(jointState_.name[i].find("shoulder_rotate") != std::string::npos)
+				jointState.position[i] = theta[0];
+			else if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
+				jointState.position[i] = theta[1];
+			else if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
+				jointState.position[i] = theta[2];
+		}else{
+			if(jointState_.name[i].find("shoulder_rotate") != std::string::npos)
+				jointState.position[i] = theta[0];
+			else if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
+				jointState.position[i] = theta[1];
+			else if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
+				jointState.position[i] = theta[2];
+		}
+
+			
+	}
+
+	return jointState_;
+}
+
 std::vector<std::vector<float>> matrixMulti(std::vector<std::vector<float>> m1, std::vector<std::vector<float>> m2){
 	std::vector<std::vector<float>> multi(4, std::vector<float>(4));
 
@@ -199,26 +240,24 @@ std::vector<std::vector<float>> matrixMulti(std::vector<std::vector<float>> m1, 
  	return multi;
 }
 
-std::vector<std::vector<float>> matrixArrayMulti(std::vector<std::vector<float>> matrix, std::vector<float> array){
-	std::vector<std::vector<float>> multi(4, std::vector<float>(4));
+std::vector<float> matrixArrayMulti(std::vector<std::vector<float>> matrix, std::vector<float> array){
+	std::vector<float> multi(matrix.size());
 
-	for(int i = 0; i < matrix[0].size(); i++){
- 		for(int j = 0; j < array.size(); j++){
- 			multi[i][j] = 0;
- 			for(int k = 0; k < nLegs; k++){
- 				multi[i][j] += matrix[i][k]*array[k];
- 			}
- 		}
- 	}
+		for(int i = 0; i < matrix.size(); i++){
+			multi[i] = 0;
+			for(int j = 0; j < matrix[0].size(); j++)
+				multi[i] += matrix[i][j]*array[j];
+		}
+
 
  	return multi;
 }
 
 std::vector<std::vector<float>> matrixSumSub(std::vector<std::vector<float>> m1, std::vector<std::vector<float>> m2, bool aux){
-	std::vector<std::vector<float>> matrix(nLegs, std::vector<float>(nLegs));
+	std::vector<std::vector<float>> matrix(m1.size(), std::vector<float>(m1[0].size()));
 
-	for(int i = 0; i < nLegs; i++)
- 		for(int j = 0; j < nLegs; j++){
+	for(int i = 0; i < m1.size(); i++)
+ 		for(int j = 0; j < m1[0].size(); j++){
  			if (aux)
  				matrix[i][j] = m1[i][j] + m2[i][j];
  			else
@@ -226,6 +265,46 @@ std::vector<std::vector<float>> matrixSumSub(std::vector<std::vector<float>> m1,
  		}
 
 	return matrix;
+}
+
+std::vector<std::vector<float>> matrixNumberMultiDiv(std::vector<std::vector<float>> matrix, float number, bool aux){
+	std::vector<std::vector<float>> result(matrix.size(), std::vector<float>(matrix[0].size()));
+
+	for(int i = 0; i < matrix.size(); i++)
+		for(int j = 0; j < matrix[0].size(); j++){
+			if(aux)
+				result[i][j] = matrix[i][j] * number;
+			else if(number != 0)
+				result[i][j] = matrix[i][j] / number;
+		}
+
+	return result;
+}
+
+std::vector<float> vectorNumberMultiDiv(std::vector<float> vector, float number, bool aux){
+	std::vector<float> result(vector.size());
+
+	for(int i = 0; i < vector.size(); i++){
+			if(aux)
+				result[i] = vector[i] * number;
+			else if(number != 0)
+				result[i] = vector[i] / number;
+		}
+
+	return result;
+}
+
+std::vector<float> vectorSumSub(std::vector<float> v1, std::vector<float> v2, bool aux){
+	std::vector<float> vector(nLegs);
+
+	for(int i = 0; i < v1.size(); i++){
+		if (aux)
+			vector[i] = v1[i] + v2[i];
+		else
+			vector[i] = v1[i] - v2[i];
+	}
+
+	return vector;
 }
 
 std::vector<std::vector<float>> matrixTransp(std::vector<std::vector<float>> a){
@@ -246,6 +325,34 @@ std::vector<std::vector<float>> createIdent(int n){
 		for(int j = 0; j < n; j++)
 			if (i == j)
 				matrix[i][j] = 1;
+
+	return matrix;
+}
+
+std::vector<std::vector<float>> invertMatrix(std::vector<std::vector<float>> matrix){
+	arma::fmat inv(3,3);
+
+	inv(0,0) = matrix[0][0];
+	inv(0,1) = matrix[0][1];
+	inv(0,2) = matrix[0][2];
+	inv(1,0) = matrix[1][0];
+	inv(1,1) = matrix[1][1];
+	inv(1,2) = matrix[1][2];
+	inv(2,0) = matrix[2][0];
+	inv(2,1) = matrix[2][1];
+	inv(2,2) = matrix[2][2];
+
+	inv = arma::pinv(inv);
+
+	matrix[0][0] = inv(0,0);
+	matrix[0][1] = inv(0,1);
+	matrix[0][2] = inv(0,2);
+	matrix[1][0] = inv(1,0);
+	matrix[1][1] = inv(1,1);
+	matrix[1][2] = inv(1,2);
+	matrix[2][0] = inv(2,0);
+	matrix[2][1] = inv(2,1);
+	matrix[2][2] = inv(2,2);
 
 	return matrix;
 }
@@ -288,7 +395,7 @@ float sum(std::vector<float> array){
 }
 
 std::vector<float> elementWiseMultiplication(std::vector<float> a, std::vector<float> b){
-	std::vector<float> array;
+	std::vector<float> array(a.size());
 
 	for(int i = 0; i < a.size(); i++)
 		array[i] = a[i] * b[i];
@@ -296,32 +403,21 @@ std::vector<float> elementWiseMultiplication(std::vector<float> a, std::vector<f
 	return array;
 }
 
-void forwardCinematic(){
+std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointState_){
 
-	std::vector<float> theta1 = {0, 0, 0, 0};
-	std::vector<float> theta2 = {-PI/3, -PI/3, PI/3, PI/3};
-	std::vector<float> theta3 = {PI/6, PI/6, -PI/6, -PI/6};
+	//std::vector<float> theta1 = {0, 0, 0, 0};
+	//std::vector<float> theta2 = {0, 0, 0, 0};
+	//std::vector<float> theta3 = {0, 0, 0, 0};
 	//initial leg angle
-	// std::vector<float> theta1 = calculateTheta("shoulder_hinge", jointState);
-	// std::vector<float> theta2 = calculateTheta("shoulder_rotate", jointState);
-	// std::vector<float> theta3 = calculateTheta("elbow_hinge", jointState);
+	std::vector<float> theta1 = calculateTheta("shoulder_hinge", jointState_);
+	std::vector<float> theta2 = calculateTheta("shoulder_rotate", jointState_);
+	std::vector<float> theta3 = calculateTheta("elbow_hinge", jointState_);
 	
 
 	std::vector<float> cm(3);
 	cm[0] = xm;
 	cm[1] = ym;
 	cm[2] = zm;
-	
-
-	//determinando ponto final
-	std::vector<std::vector<float>> objPoint(4, std::vector<float>(3, 0.0));
-	
-	objPoint[0] = {-.45, 0, .2};
-	objPoint[1]	= {.65, 0, .2};
-	objPoint[2]	= {.65, 0, -.2};
-	objPoint[3]	= {-.45, 0, -.2};
-
-	std::vector<std::vector<float>> dx = objPoint;
 
 	
 	//calculation initiates------------------------------
@@ -336,7 +432,7 @@ void forwardCinematic(){
 
 	Rx[1][1] = Rx[2][2] = cos(omega);
 	Rx[1][2] = -sin(omega);
-	Rx[2][1] = sin(omega);
+	Rx[2][1] = sin(omega);	
 
 	Ry[0][0] = Ry[2][2] = cos(phi);
 	Ry[0][2] = sin(phi);
@@ -394,7 +490,7 @@ void forwardCinematic(){
 	pointC[2] = {pointC1[2], pointC2[2], pointC3[2], pointC4[2]};
 
 	//Torque declaration
-	std::vector<std::vector<std::vector<float>>> Torques(4);
+	std::vector<std::vector<float>> Torques(4);
 
 	std::vector<std::vector<float>> Patas(4);
 
@@ -449,33 +545,41 @@ void forwardCinematic(){
 		Patas[i] = P;
 	}
 
-	std::vector<std::vector<float>> newTorques = simplerMatrix(Torques);	
+	
+	//std::vector<std::vector<float>> newTorques = simplerMatrix(Torques);	
+
+	std::cout << "-------------- Posição das Patas ---------------" << std::endl;
+	std::cout << "-------------- Right Back ---------------" << std::endl;
+	std::cout << Patas[0][0] << std::endl;
+	std::cout << Patas[0][1] << std::endl;
+	std::cout << Patas[0][2] << std::endl;
+	std::cout << "-------------- Right Front ---------------" << std::endl;
+	std::cout << Patas[1][0] << std::endl;
+	std::cout << Patas[1][1] << std::endl;
+	std::cout << Patas[1][2] << std::endl;
+	std::cout << "-------------- Left Front ---------------" << std::endl;
+	std::cout << Patas[2][0] << std::endl;
+	std::cout << Patas[2][1] << std::endl;
+	std::cout << Patas[2][2] << std::endl;
+	std::cout << "-------------- Left Back ---------------" << std::endl;
+	std::cout << Patas[3][0] << std::endl;
+	std::cout << Patas[3][1] << std::endl;
+	std::cout << Patas[3][2] << std::endl;
+
+	return Patas;
 }
 
-void inverseCinematic(){
+sensor_msgs::JointState inverseCinematic(sensor_msgs::JointState jointState, std::vector<std::vector<float>> objPoint){//sensor_msgs::JointState jointState_){
 
-	std::vector<float> theta1 = {0, 0, 0, 0};
-	std::vector<float> theta2 = {-PI/3, -PI/3, PI/3, PI/3};
-	std::vector<float> theta3 = {PI/6, PI/6, -PI/6, -PI/6};
-	//initial leg angle
-	// std::vector<float> theta1 = calculateTheta("shoulder_hinge", jointState);
-	// std::vector<float> theta2 = calculateTheta("shoulder_rotate", jointState);
-	// std::vector<float> theta3 = calculateTheta("elbow_hinge", jointState);
-	
+	std::vector<float> theta1 = calculateTheta("shoulder_hinge", jointState);
+	std::vector<float> theta2 = calculateTheta("shoulder_rotate", jointState);
+	std::vector<float> theta3 = calculateTheta("elbow_hinge", jointState);
 
 	std::vector<float> cm(3);
 	cm[0] = xm;
 	cm[1] = ym;
 	cm[2] = zm;
-	
 
-	//determinando ponto final
-	std::vector<std::vector<float>> objPoint(4, std::vector<float>(3, 0.0));
-	
-	objPoint[0] = {-.45, 0, .2};
-	objPoint[1]	= {.65, 0, .2};
-	objPoint[2]	= {.65, 0, -.2};
-	objPoint[3]	= {-.45, 0, -.2};
 
 	std::vector<std::vector<float>> dx = objPoint;
 
@@ -509,6 +613,7 @@ void inverseCinematic(){
 
 	std::vector<std::vector<float>> Tm = matrixSumSub(matrixMulti(Rxyz, createIdent(nLegs)),matrixAux, true);
 
+
 	//Transformation for each leg
 
 	std::vector<std::vector<float>> right_back_leg_matrix(4, std::vector<float>(4));
@@ -532,12 +637,13 @@ void inverseCinematic(){
 		left_back_leg_matrix[2] = {1, 0, 0, -bodyWidth/2};
 		left_back_leg_matrix[3] = {0, 0, 0, 1};
 
-	std::vector<std::vector<float>> Trb = matrixMulti(Tm, right_back_leg_matrix);
+	std::vector<std::vector<float>>  Trb = matrixMulti(Tm, right_back_leg_matrix);
 	std::vector<std::vector<float>> Trf = matrixMulti(Tm, right_front_leg_matrix);
 	std::vector<std::vector<float>> Tlb = matrixMulti(Tm, left_back_leg_matrix);
 	std::vector<std::vector<float>> Tlf = matrixMulti(Tm, left_front_leg_matrix);
 
 	std::vector<std::vector<std::vector<float>>> P04 = {Trb, Trf, Tlf, Tlb};
+
 
 	//position shoulder
 	std::vector<float> pointC1 = {P04[0][0][3], P04[0][1][3], P04[0][2][3]};
@@ -549,6 +655,7 @@ void inverseCinematic(){
 	pointC[1] = {pointC1[1], pointC2[1], pointC3[1], pointC4[1]};
 	pointC[2] = {pointC1[2], pointC2[2], pointC3[2], pointC4[2]};
 
+
 	//Torque declaration
 	std::vector<std::vector<std::vector<float>>> Torques(4);
 
@@ -559,6 +666,9 @@ void inverseCinematic(){
 		float t1 = theta1[i];
 		float t2 = theta2[i];
 		float t3 = theta3[i];
+
+		std::vector<float> dtheta;
+		std::vector<float> Theta;
 
 		while(sum(elementWiseMultiplication(dx[i],dx[i])) >= .001){
 
@@ -572,14 +682,12 @@ void inverseCinematic(){
 			std::vector<std::vector<float>> T2 = matrixMulti(A1, A2);
 			std::vector<std::vector<float>> T3 = matrixMulti(T2, A3);
 
-
 			//creating zi
 			std::vector<float> z0 = {P04[i][0][2], P04[i][1][2], P04[i][2][2]};
 			std::vector<float> z1 = {A1[0][2], A1[1][2], A1[2][2]};
 			std::vector<float> z2 = {T2[0][2], T2[1][2], T2[2][2]};
 			std::vector<float> z3 = {T3[0][2], T3[1][2], T3[2][2]};
 
-			
 
 			//creating pi
 			std::vector<float> p0 = {P04[i][0][3], P04[i][1][3], P04[i][2][3]};
@@ -592,16 +700,39 @@ void inverseCinematic(){
 			std::vector<float> aux1 = cross(z0, {P[0]-p0[0],P[1]-p0[1],P[2]-p0[2]});
 			std::vector<float> aux2 = cross(z1, {P[0]-p1[0],P[1]-p1[1],P[2]-p1[2]});
 			std::vector<float> aux3 = cross(z2, {P[0]-p2[0],P[1]-p2[1],P[2]-p2[2]});
-			J[0] = {aux1[0], aux2[0], aux3[0]};
-			J[1] = {aux1[1], aux2[1], aux3[1]};
-			J[2] = {aux1[2], aux2[2], aux3[2]};
-			J[3] = {z0[0], z1[0], z2[0]};
-			J[4] = {z0[1], z1[1], z2[1]};
-			J[5] = {z0[2], z1[2], z2[2]};
+			J = {{aux1[0], aux2[0], aux3[0]}, {aux1[1], aux2[1], aux3[1]},
+			        {aux1[2], aux2[2], aux3[2]}, {z0[0], z1[0], z2[0]},
+			        {z0[1], z1[1], z2[1]}, {z0[2], z1[2], z2[2]}};
+
+			dx[i] = vectorSumSub(objPoint[i], P, false);
+
+			std::vector<std::vector<float>> J_ = {{J[0][0], J[0][1], J[0][2]}, {J[1][0], J[1][1], J[1][2]}, {J[2][0], J[2][1], J[2][2]}};
+			J_ = invertMatrix(J_);
+
+			dtheta = matrixArrayMulti(J_, vectorNumberMultiDiv(dx[i],0.1, true));
+
+			Theta = vectorSumSub({t1, t2, t3}, dtheta, true);	
+
+			t1 = Theta[0];
+			t2 = Theta[1];
+			t3 = Theta[2];
 
 		}
 
+		if(i == 0)
+			jointState = insertTheta(Theta, jointState, "right_back");
+		else if(i == 1)
+			jointState = insertTheta(Theta, jointState, "right_front");
+		else if(i == 2)
+			jointState = insertTheta(Theta, jointState, "left_front");
+		else
+			jointState = insertTheta(Theta, jointState, "left_back");
+
 	}
+
+
+
+	return jointState;
 }
 
 
@@ -609,57 +740,63 @@ void inverseCinematic(){
 
 int main(int argc, char** argv){
 
-	// ros::init(argc, argv, "controllerTesting");
-	// ros::NodeHandle n;
+	ros::init(argc, argv, "controllerTesting");
+	ros::NodeHandle n;
 
 
 	// //waiting ros node got ready
-	// ros::Time last_ros_time_;
-	// bool wait = true;
-	// while(wait){
-	// 	last_ros_time_ = ros::Time::now();
-	// 	if (last_ros_time_.toSec() > 0)
-	// 		wait = false;
-	// }
+	ros::Time last_ros_time_;
+	bool wait = true;
+	while(wait){
+		last_ros_time_ = ros::Time::now();
+		if (last_ros_time_.toSec() > 0)
+			wait = false;
+	}
 
-	// //ros::Time time = ros::Time::now();
+	//ros::Time time = ros::Time::now();
 
-	// std::vector<ros::Publisher> jointPub(nJoints);
+	std::vector<ros::Publisher> jointPub(nJoints);
 
-	// jointState.name.resize(nJoints);
-	// jointState.position.resize(nJoints);
+	jointState.name.resize(nJoints);
+	jointState.position.resize(nJoints);
 
-	// std::sort(jointName.begin(), jointName.end());
+	std::sort(jointName.begin(), jointName.end());
 
-	// for(int i = 0; i < nJoints; i++)
-	// 	jointPub[i] = n.advertise<std_msgs::Float64>("/quadrupedal_test/" + jointName[i] + "_controller/command", 5);
+	for(int i = 0; i < nJoints; i++)
+		jointPub[i] = n.advertise<std_msgs::Float64>("/quadrupedal_test/" + jointName[i] + "_controller/command", 5);
 	
-	// ros::Subscriber sub = n.subscribe("/quadrupedal_test/joint_states", 10, jointCallback);
-	// ros::Rate r(RATE);
+	ros::Subscriber sub = n.subscribe("/quadrupedal_test/joint_states", 10, jointCallback);
+	ros::Rate r(RATE);
 	
 	
-	// std::string robot_desc_string;
-	// n.param("robot_description", robot_desc_string, std::string());
+	std::string robot_desc_string;
+	n.param("robot_description", robot_desc_string, std::string());
 
 
-	// sensor_msgs::JointState crouchState = crouch(jointName);
+	sensor_msgs::JointState crouchState = crouch(jointName);
+	std::vector<std::vector<float>> footPos;
+	std::vector<std::vector<float>> objPoint;
 
-	//while(ros::ok()){
+	while(ros::ok()){
 
-		
+		objPoint = forwardCinematic(jointState);
 
-		// for(int i = 0; i < nJoints; i++){			
+		//forwardCinematic(crouchState);
+
+		jointState = inverseCinematic(jointState, objPoint);
+
+		 for(int i = 0; i < nJoints; i++){			
 			
 
-		// 	std_msgs::Float64 msg;
-		// 	msg.data = crouchState.position[i];
-		// 	//msg.data = 1.5;
-		// 	jointPub[i].publish(msg);
-		// }
+		 	std_msgs::Float64 msg;
+		 	msg.data = jointState.position[i];
+		 	//msg.data = 1.5;
+		 	jointPub[i].publish(msg);
+		 }
 
+		 break;
 
-
-		//ros::spinOnce();
-	//}
+		ros::spinOnce();
+	}
 
 }

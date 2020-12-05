@@ -12,13 +12,18 @@
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
 
+//=========================== VARIABLES =======================================
+
+//--------------------------- Constants ---------------------------------------
+
 #define PI 3.14159
 #define RATE 30
 
-//P0ARAMETERS------------------------------------------------
+//--------------------------- ROBOT PARAMETERS --------------------------------
+// currently for model2.urdf
+
 static const int nJoints = 12;
 static const int nLegs = 4;
-
 
 static const float bodyLength = 1;
 static const float bodyWidth = .4;
@@ -27,7 +32,6 @@ static const float legLength = .4;
 static const float calfLength = .4;
 static const float weight = 100;
 
-//
 static const float omega = 0;
 static const float phi = 0;
 static const float psi = PI/6;
@@ -36,18 +40,21 @@ static const float ym = 0;
 static const float zm = .8;
 
 
-//joint names
+//--------------------------- Joint Names -------------------------------------
 std::vector<std::string> jointName= {"left_front_leg_shoulder_rotate", "right_front_leg_shoulder_rotate", "left_back_leg_shoulder_rotate", "right_back_leg_shoulder_rotate",
 											"left_front_leg_shoulder_hinge", "right_front_leg_shoulder_hinge", "left_back_leg_shoulder_hinge", "right_back_leg_shoulder_hinge",
 											"left_front_leg_elbow_hinge", "right_front_leg_elbow_hinge", "left_back_leg_elbow_hinge", "right_back_leg_elbow_hinge"};
 
 
 
-
+//--------------------------- Variable to receive robot info ------------------
 sensor_msgs::JointState jointState;
 
+//=========================== FUNCTIONS =======================================
 
+// -------------------------- ROS Stuff ----------------------------------
 void jointCallback(const sensor_msgs::JointState::ConstPtr &_js){
+//translates ROS joint_states message to the global variable
 
 	jointState.header.seq = _js->header.seq;
 	jointState.header.stamp = _js->header.stamp;
@@ -60,7 +67,21 @@ void jointCallback(const sensor_msgs::JointState::ConstPtr &_js){
 	}
 }
 
+void printJointState(sensor_msgs::JointState jointState_){
+//prints data on joint state variable
+
+	for(int i = 0; i < nJoints; i++){
+		std::cout << "Joint Name: " <<std::endl;
+		std::cout << jointState_.name[i] <<std::endl;
+		std::cout << "Joint Position: " <<std::endl;
+		std::cout << jointState_.position[i] <<std::endl;
+	}
+}
+
+// -------------------------- Movement Templates -------------------------
+
 sensor_msgs::JointState crouch(std::vector<std::string> jointName){
+//radians for each joint to get the robot on a crouching stance
 	sensor_msgs::JointState jointState_;
 
 	jointState_.name.resize(nJoints);
@@ -90,6 +111,7 @@ sensor_msgs::JointState crouch(std::vector<std::string> jointName){
 }
 
 sensor_msgs::JointState standUp(std::vector<std::string> jointName_){
+//radians for each joint to get the robot on a stood up stance
 	sensor_msgs::JointState jointState_;
 
 	jointState_.name.resize(nJoints);
@@ -104,49 +126,46 @@ sensor_msgs::JointState standUp(std::vector<std::string> jointName_){
 	return jointState_;
 }
 
-sensor_msgs::JointState showOff(std::vector<std::string> jointName_, bool aux){
-	sensor_msgs::JointState jointState_;
-
-	jointState_.name.resize(nJoints);
-	jointState_.position.resize(nJoints);
-
-	jointState_.name = jointName;
+sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, bool aux){
+//radians for each joint to get the robot to lift some of the legs
 
 	for(int i = 0; i < nJoints; i++){
-		if(jointState_.name[i].find("_shoulder_hinge") != std::string::npos){
-
-			jointState_.position[i] = 0;
-
-		}else if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
-			if((jointState_.name[i].find("left_front") != std::string::npos || jointState_.name[i].find("right_back") != std::string::npos) && aux)
-				jointState_.position[i] = -.7;
-			else if((jointState_.name[i].find("right_front") != std::string::npos || jointState_.name[i].find("left_back") != std::string::npos)&& !aux)
-				jointState_.position[i] = .7;
-			else
-				jointState_.position[i] = 0;
+		if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
+			if(aux){
+				if(jointState_.name[i].find("right_back") != std::string::npos)
+					jointState_.position[i] = .9;
+				else if(jointState_.name[i].find("left_back") != std::string::npos)
+					jointState_.position[i] = -.28;
+			}else{
+				if(jointState_.name[i].find("right_back") != std::string::npos)
+					jointState_.position[i] = .28;
+				else if(jointState_.name[i].find("left_back") != std::string::npos)
+					jointState_.position[i] = -.9;
+			}
 		}else if(jointState_.name[i].find("_leg_elbow") != std::string::npos){
-			if((jointState_.name[i].find("left_front") != std::string::npos || jointState_.name[i].find("right_back") != std::string::npos) && aux)
-				jointState_.position[i] = 1.57;
-			else if((jointState_.name[i].find("right_front") != std::string::npos || jointState_.name[i].find("left_back") != std::string::npos) && !aux)
-				jointState_.position[i] = -1.57;
-			else
-				jointState_.position[i] = 0;
+			if(aux){
+				if(jointState_.name[i].find("right_back") != std::string::npos)
+					jointState_.position[i] = -1.57;
+				else if(jointState_.name[i].find("left_back") != std::string::npos)
+					jointState_.position[i] = .6;
+			}else{
+				if(jointState_.name[i].find("right_back") != std::string::npos)
+					jointState_.position[i] = -.6;
+				else if(jointState_.name[i].find("left_back") != std::string::npos)
+					jointState_.position[i] = 1.57;
+			}
 		}
 	}
 
 	return jointState_;
-
 }
 
-void printJointState(sensor_msgs::JointState jointState_){
-	for(int i = 0; i < nJoints; i++){
-		std::cout << "-------" <<std::endl;
-		std::cout << jointState_.name[i] <<std::endl;
-		std::cout << jointState_.position[i] <<std::endl;
-	}
-}
+//=========================== Mathematical functions =====================
 
+
+//--------------------------- Miscellaneous -----------------------------------
 std::vector<float> cross(std::vector<float> v1, std::vector<float> v2){
+//creates a vector third perpendicular vector
 	std::vector<std::vector<float>> matrix(3,std::vector<float>(3));
 	std::vector<float> vector(3);
 	matrix[0] = {1, 1, 1};
@@ -158,8 +177,22 @@ std::vector<float> cross(std::vector<float> v1, std::vector<float> v2){
 	return vector;
 }
 
-std::vector<float> calculateTheta(std::string type, sensor_msgs::JointState jointState_){
+std::vector<std::vector<float>> Trans(float a, float b, float c, float d){
+//DH Homogeneous Transformation Matrix - Lucas Rigobello
+	std::vector<std::vector<float>> T(4, std::vector<float>(4));
 
+	T[0] = {cos(d), -sin(d)*round(cos(b)), sin(d)*sin(b), a*cos(d)};
+	T[1] = {sin(d), cos(d)*round(cos(b)), -cos(d)*sin(b), a*sin(d)};
+	T[2] = {0, sin(b), round(cos(b)), c};
+	T[3] = {0, 0, 0, 1};
+
+	return T;
+}
+
+//--------------------------- Theta handling ----------------------------------
+
+std::vector<float> calculateTheta(std::string type, sensor_msgs::JointState jointState_){
+//search in a joint state variable for radian values on a specific type of joint
 	std::vector<float> theta(nLegs);
 
 	for(int i = 0; i < nJoints; i++){
@@ -187,12 +220,12 @@ std::vector<float> calculateTheta(std::string type, sensor_msgs::JointState join
 }
 
 sensor_msgs::JointState insertTheta(std::vector<float> theta, sensor_msgs::JointState jointState_, std::string leg){
-
+//inserts radian values on specific joints of a joint state variable
 	for(int i = 0; i < jointState_.name.size(); i++){
 		if(jointState_.name[i].find(leg) != std::string::npos){
-			if(jointState_.name[i].find("shoulder_rotate") != std::string::npos)
+			if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
 				jointState_.position[i] = theta[0];
-			else if(jointState_.name[i].find("shoulder_hinge") != std::string::npos)
+			else if(jointState_.name[i].find("shoulder_rotate") != std::string::npos)
 				jointState_.position[i] = theta[1];
 			else if(jointState_.name[i].find("elbow_hinge") != std::string::npos)
 				jointState_.position[i] = theta[2];
@@ -204,7 +237,10 @@ sensor_msgs::JointState insertTheta(std::vector<float> theta, sensor_msgs::Joint
 	return jointState_;
 }
 
+//--------------------------- Matrix-related ----------------------------------
+
 std::vector<std::vector<float>> matrixMulti(std::vector<std::vector<float>> m1, std::vector<std::vector<float>> m2){
+//multiplies two matrixes
 	std::vector<std::vector<float>> multi(4, std::vector<float>(4));
 
 	for(int i = 0; i < m1[0].size(); i++){
@@ -220,6 +256,7 @@ std::vector<std::vector<float>> matrixMulti(std::vector<std::vector<float>> m1, 
 }
 
 std::vector<float> matrixArrayMulti(std::vector<std::vector<float>> matrix, std::vector<float> array){
+//multiply a matrix and an array
 	std::vector<float> multi(matrix.size());
 
 		for(int i = 0; i < matrix.size(); i++){
@@ -233,6 +270,7 @@ std::vector<float> matrixArrayMulti(std::vector<std::vector<float>> matrix, std:
 }
 
 std::vector<std::vector<float>> matrixSumSub(std::vector<std::vector<float>> m1, std::vector<std::vector<float>> m2, bool aux){
+//sums or substracts two matrixes
 	std::vector<std::vector<float>> matrix(m1.size(), std::vector<float>(m1[0].size()));
 
 	for(int i = 0; i < m1.size(); i++)
@@ -247,6 +285,7 @@ std::vector<std::vector<float>> matrixSumSub(std::vector<std::vector<float>> m1,
 }
 
 std::vector<std::vector<float>> matrixNumberMultiDiv(std::vector<std::vector<float>> matrix, float number, bool aux){
+//multiplies or divide a matrix by a number
 	std::vector<std::vector<float>> result(matrix.size(), std::vector<float>(matrix[0].size()));
 
 	for(int i = 0; i < matrix.size(); i++)
@@ -260,33 +299,8 @@ std::vector<std::vector<float>> matrixNumberMultiDiv(std::vector<std::vector<flo
 	return result;
 }
 
-std::vector<float> vectorNumberMultiDiv(std::vector<float> vector, float number, bool aux){
-	std::vector<float> result(vector.size());
-
-	for(int i = 0; i < vector.size(); i++){
-			if(aux)
-				result[i] = vector[i] * number;
-			else if(number != 0)
-				result[i] = vector[i] / number;
-		}
-
-	return result;
-}
-
-std::vector<float> vectorSumSub(std::vector<float> v1, std::vector<float> v2, bool aux){
-	std::vector<float> vector(nLegs);
-
-	for(int i = 0; i < v1.size(); i++){
-		if (aux)
-			vector[i] = v1[i] + v2[i];
-		else
-			vector[i] = v1[i] - v2[i];
-	}
-
-	return vector;
-}
-
 std::vector<std::vector<float>> matrixTransp(std::vector<std::vector<float>> a){
+//finds the transposed matrix
 	std::vector<std::vector<float>> matrix(a.size(), std::vector<float>(a[0].size()));
 
 	for (int i = 0; i < a[0].size(); i++)
@@ -296,8 +310,8 @@ std::vector<std::vector<float>> matrixTransp(std::vector<std::vector<float>> a){
 	return matrix;
 }
 
-
 std::vector<std::vector<float>> createIdent(int n){
+//create a matrix of zeros with ones at the main diagonal
 	std::vector<std::vector<float>> matrix(n, std::vector<float>(n, 0.0));
 
 	for(int i = 0; i < n; i++)
@@ -309,6 +323,7 @@ std::vector<std::vector<float>> createIdent(int n){
 }
 
 std::vector<std::vector<float>> invertMatrix(std::vector<std::vector<float>> matrix){
+//pseudo-inverts a matrix
 	arma::fmat inv(3,3);
 
 	inv(0,0) = matrix[0][0];
@@ -336,19 +351,8 @@ std::vector<std::vector<float>> invertMatrix(std::vector<std::vector<float>> mat
 	return matrix;
 }
 
-std::vector<std::vector<float>> Trans(float a, float b, float c, float d){
-	//DH Homogeneous Transformation Matrix - Lucas Rigobello
-	std::vector<std::vector<float>> T(4, std::vector<float>(4));
-
-	T[0] = {cos(d), -sin(d)*round(cos(b)), sin(d)*sin(b), a*cos(d)};
-	T[1] = {sin(d), cos(d)*round(cos(b)), -cos(d)*sin(b), a*sin(d)};
-	T[2] = {0, sin(b), round(cos(b)), c};
-	T[3] = {0, 0, 0, 1};
-
-	return T;
-}
-
 std::vector<std::vector<float>> simplerMatrix(std::vector<std::vector<std::vector<float>>> a){
+//simplifies a vector<vector<vector into a vector<vector
 	int newSize = 0;
 	for (int i = 0; i < a[0].size(); i++){
 		newSize += a[0][i].size();
@@ -364,7 +368,39 @@ std::vector<std::vector<float>> simplerMatrix(std::vector<std::vector<std::vecto
 	return matrix;
 }
 
+//--------------------------- Vector-related ----------------------------------
+
+std::vector<float> vectorNumberMultiDiv(std::vector<float> vector, float number, bool aux){
+//divides or multiply a vector by a number
+	std::vector<float> result(vector.size());
+
+	for(int i = 0; i < vector.size(); i++){
+			if(aux)
+				result[i] = vector[i] * number;
+			else if(number != 0)
+				result[i] = vector[i] / number;
+		}
+
+	return result;
+}
+
+std::vector<float> vectorSumSub(std::vector<float> v1, std::vector<float> v2, bool aux){
+//sums or substracts two vectors
+	std::vector<float> vector(nLegs);
+
+	for(int i = 0; i < v1.size(); i++){
+		if (aux)
+			vector[i] = v1[i] + v2[i];
+		else
+			vector[i] = v1[i] - v2[i];
+	}
+
+	return vector;
+}
+
+
 float sum(std::vector<float> array){
+//sums all the values of a vector
 	float result = 0;
 	for (int i = 0; i < array.size(); i++){
 		result += array[i];
@@ -374,6 +410,7 @@ float sum(std::vector<float> array){
 }
 
 std::vector<float> elementWiseMultiplication(std::vector<float> a, std::vector<float> b){
+//multiply every vector element by its correspondant on the other (a[i]*b[i])
 	std::vector<float> array(a.size());
 
 	for(int i = 0; i < a.size(); i++)
@@ -382,8 +419,10 @@ std::vector<float> elementWiseMultiplication(std::vector<float> a, std::vector<f
 	return array;
 }
 
-std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointState_){
+//--------------------------- Robot Cinematic ---------------------------------
 
+std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointState_){
+//calculates the point of each foot based on the radians of each joint
 	// std::vector<float> theta1 = {0, 0, 0, 0};
 	// std::vector<float> theta2 = {0, 0, 0, 0};
 	// std::vector<float> theta3 = {0, 0, 0, 0};
@@ -531,28 +570,29 @@ std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointSt
 	
 	//std::vector<std::vector<float>> newTorques = simplerMatrix(Torques);	
 
-	std::cout << "-------------- Posição das Patas ---------------" << std::endl;
-	std::cout << "-------------- Right Back ---------------" << std::endl;
-	std::cout << Patas[0][0] << std::endl;
-	std::cout << Patas[0][1] << std::endl;
-	std::cout << Patas[0][2] << std::endl;
-	std::cout << "-------------- Right Front ---------------" << std::endl;
-	std::cout << Patas[1][0] << std::endl;
-	std::cout << Patas[1][1] << std::endl;
-	std::cout << Patas[1][2] << std::endl;
-	std::cout << "-------------- Left Front ---------------" << std::endl;
-	std::cout << Patas[2][0] << std::endl;
-	std::cout << Patas[2][1] << std::endl;
-	std::cout << Patas[2][2] << std::endl;
-	std::cout << "-------------- Left Back ---------------" << std::endl;
-	std::cout << Patas[3][0] << std::endl;
-	std::cout << Patas[3][1] << std::endl;
-	std::cout << Patas[3][2] << std::endl;
+	// std::cout << "-------------- Posição das Patas ---------------" << std::endl;
+	// std::cout << "-------------- Right Back ---------------" << std::endl;
+	// std::cout << Patas[0][0] << std::endl;
+	// std::cout << Patas[0][1] << std::endl;
+	// std::cout << Patas[0][2] << std::endl;
+	// std::cout << "-------------- Right Front ---------------" << std::endl;
+	// std::cout << Patas[1][0] << std::endl;
+	// std::cout << Patas[1][1] << std::endl;
+	// std::cout << Patas[1][2] << std::endl;
+	// std::cout << "-------------- Left Front ---------------" << std::endl;
+	// std::cout << Patas[2][0] << std::endl;
+	// std::cout << Patas[2][1] << std::endl;
+	// std::cout << Patas[2][2] << std::endl;
+	// std::cout << "-------------- Left Back ---------------" << std::endl;
+	// std::cout << Patas[3][0] << std::endl;
+	// std::cout << Patas[3][1] << std::endl;
+	// std::cout << Patas[3][2] << std::endl;
 
 	return Patas;
 }
 
 sensor_msgs::JointState inverseCinematic(sensor_msgs::JointState jointState_, std::vector<std::vector<float>> objPoint){//sensor_msgs::JointState jointState_){
+//calculates the trajectory of each joint to reach the objective point
 
 	// std::vector<float> theta1 = {0, 0, 0, 0};
 	// std::vector<float> theta2 = {-PI/3, -PI/3, PI/3, PI/3};
@@ -733,20 +773,20 @@ sensor_msgs::JointState inverseCinematic(sensor_msgs::JointState jointState_, st
 
 	// std::cout << "Theta Leg 1: " << std::endl;
 	// std:: cout << Theta[0][0] << std::endl;
-	// std:: cout << Theta[1][0] << std::endl;
-	// std:: cout << Theta[2][0] << std::endl;
-	// std::cout << "Theta Leg 2: " << std::endl;
 	// std:: cout << Theta[0][1] << std::endl;
-	// std:: cout << Theta[1][1] << std::endl;
-	// std:: cout << Theta[2][1] << std::endl;
-	// std::cout << "Theta Leg 3: " << std::endl;
 	// std:: cout << Theta[0][2] << std::endl;
+	// std::cout << "Theta Leg 2: " << std::endl;
+	// std:: cout << Theta[1][0] << std::endl;
+	// std:: cout << Theta[1][1] << std::endl;
 	// std:: cout << Theta[1][2] << std::endl;
+	// std::cout << "Theta Leg 3: " << std::endl;
+	// std:: cout << Theta[2][0] << std::endl;
+	// std:: cout << Theta[2][1] << std::endl;
 	// std:: cout << Theta[2][2] << std::endl;
 	// std::cout << "Theta Leg 4: " << std::endl;
-	// std:: cout << Theta[0][3] << std::endl;
-	// std:: cout << Theta[1][3] << std::endl;
-	// std:: cout << Theta[2][3] << std::endl;
+	// std:: cout << Theta[3][0] << std::endl;
+	// std:: cout << Theta[3][1] << std::endl;
+	// std:: cout << Theta[3][2] << std::endl;
 
 	// std::cout << "---------" << std::endl;
 	// printJointState(jointState_);
@@ -762,11 +802,12 @@ sensor_msgs::JointState inverseCinematic(sensor_msgs::JointState jointState_, st
 
 int main(int argc, char** argv){
 
+	//starts the program ROS Node
 	ros::init(argc, argv, "controllerTesting");
 	ros::NodeHandle n;
 
 
-	// //waiting ros node got ready
+	// //waiting ros node to get ready
 	ros::Time last_ros_time_;
 	bool wait = true;
 	while(wait){
@@ -775,80 +816,82 @@ int main(int argc, char** argv){
 			wait = false;
 	}
 
-	//ros::Time time = ros::Time::now();
-
+	//creating the publishers that will send our info back to ROS server
 	std::vector<ros::Publisher> jointPub(nJoints);
 
+	//preparing the global state variable
 	jointState.name.resize(nJoints);
 	jointState.position.resize(nJoints);
 
+	//arranging the joint names based on rostopic (alphabetically)
 	std::sort(jointName.begin(), jointName.end());
 
+	//assign each publisher to a joint
 	for(int i = 0; i < nJoints; i++)
 		jointPub[i] = n.advertise<std_msgs::Float64>("/quadrupedal_test/" + jointName[i] + "_controller/command", 5);
 	
+	//create the subscriber and subscribes to the joint_states topic
 	ros::Subscriber sub = n.subscribe("/quadrupedal_test/joint_states", 1, jointCallback);
+	
+	//set a rate to control the loop	
 	ros::Rate r(RATE);
 	
-	
+	//get the robot name from ROSPARAM | not needed right now
 	// std::string robot_desc_string;
 	// n.param("robot_description", robot_desc_string, std::string());
 
 
+	//======================= Testing Variables ===============================
+	//can get very messy
+
 	// sensor_msgs::JointState crouchState = crouch(jointName);
 	// std::vector<std::vector<float>> footPos;
 	std::vector<std::vector<float>> objPoint;
-	std::vector<std::vector<float>> auxPoint;
 	//---------------------------------------------------------
-
-	//nesse momento o códio não ta mandando nada pro robô, tá só printando os resultados
-	//
 	
 	bool stance = true;
-	sensor_msgs::JointState testeState = showOff(jointName, stance);//levanta as duas pernas opostas
-	//stance = true levanta Trb e Tlf, stance = false levanta Tlb e Trf
-	//testeState recebe a posição (em radianos) pra cada joint se manter nessa posição
-	//de perna levantada
+	sensor_msgs::JointState testeState = crouch(jointName);
 
-	objPoint = forwardCinematic(testeState);
-	//utilizando essa variável setada antes, ele faz a cinematica direta pra achar o ponto dos pés
-
-   	//testeState = inverseCinematic(standUp(jointName), objPoint);
-   	//se descomentar a linha acima, ele usa a inversa pra calcular a tragetória do robo em pé parado
-   	//que vem da função standUp(jointName) (estado inicial) para o ponto objetivo, calculado com a direta
-	
-	printJointState(testeState);//printa a variavel com as posições em radiano das juntas
-
+	//printJointState(testeState);
 
 	//testeState.position[2] = -.9;
 
-	// while(ros::ok()){
-	// 	// auxPoint = forwardCinematic(jointState);
-	// 	// std::cout << auxPoint[0][2] << std::endl;
-	// 	// if(auxPoint[0][2] >  && auxPoint[2][2] > )
-	// 	// 	stance = false;
-	// 	// else if(auxPoint[1][2] >  && auxPoint[3][2] > )
-	// 	// 	stance = true;
+	//======================= The Magic Happens Here ==========================
+
+	//timing variables
+	ros::Time startingLoop = ros::Time::now();
+	ros::Time cycle = ros::Time::now();
+	while(ros::ok()){
+
+		//starts the walking sequence after 5 seconds of loop
+		if(ros::Time::now().toSec() - startingLoop.toSec() > 5){
+			//changes legs after .8 seconds
+			if(ros::Time::now().toSec() - cycle.toSec() >= .8){
+				cycle = ros::Time::now();
+				stance = !stance;
+			}
+			testeState = showOff(crouch(jointName), stance);
+			objPoint = forwardCinematic(testeState);
+			testeState = inverseCinematic(crouch(jointName), objPoint);
+		}
 
 
-	// 	if(jointState.header.seq != 0){
+		//starts publishing only after the first joint state message was received
+		if(jointState.header.seq != 0){
+			for(int i = 0; i < nJoints; i++){
+				std_msgs::Float64 msg;
+				msg.data = testeState.position[i];
+				//msg.data = -.9;
+				jointPub[i].publish(msg);
+			}
+		}
 
-		   	
-	// 		// forwardCinematic(crouchState);
-	// 		// jointState = inverseCinematic(jointState, objPoint);
-	// 		for(int i = 0; i < nJoints; i++){
-	// 			std_msgs::Float64 msg;
-	// 			msg.data = testeState.position[i];
-	// 			//msg.data = -.9;
-	// 			jointPub[i].publish(msg);
-	// 		}
 
-	// 	}
+		//controls the subscriber, asks for new messages to be received
+		ros::spinOnce();
+		//sleeps the necessary time to respect the specified rate value
+		r.sleep();
 
-	// // 	//break;
-	// 	ros::spinOnce();
-	// 	r.sleep();
-
-	// }
+	}
 
 }

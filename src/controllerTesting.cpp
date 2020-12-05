@@ -6,20 +6,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <opencv2/core.hpp>
 #include <armadillo>
 
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
 
-//=========================== VARIABLES =======================================
+//=========================== VARIABLES =======================================\\
 
-//--------------------------- Constants ---------------------------------------
+//--------------------------- Constants ---------------------------------------\\
 
 #define PI 3.14159
 #define RATE 30
 
-//--------------------------- ROBOT PARAMETERS --------------------------------
+//--------------------------- ROBOT PARAMETERS --------------------------------\\
 // currently for model2.urdf
 
 static const int nJoints = 12;
@@ -40,19 +39,24 @@ static const float ym = 0;
 static const float zm = .8;
 
 
-//--------------------------- Joint Names -------------------------------------
+//--------------------------- Joint Names -------------------------------------\\
+
 std::vector<std::string> jointName= {"left_front_leg_shoulder_rotate", "right_front_leg_shoulder_rotate", "left_back_leg_shoulder_rotate", "right_back_leg_shoulder_rotate",
 											"left_front_leg_shoulder_hinge", "right_front_leg_shoulder_hinge", "left_back_leg_shoulder_hinge", "right_back_leg_shoulder_hinge",
 											"left_front_leg_elbow_hinge", "right_front_leg_elbow_hinge", "left_back_leg_elbow_hinge", "right_back_leg_elbow_hinge"};
 
 
 
-//--------------------------- Variable to receive robot info ------------------
+//--------------------------- Variable to receive robot info ------------------\\
+
 sensor_msgs::JointState jointState;
 
-//=========================== FUNCTIONS =======================================
+//=============================================================================\\
+//=========================== FUNCTIONS =======================================\\
+//=============================================================================\\
 
-// -------------------------- ROS Stuff ----------------------------------
+// -------------------------- ROS Stuff ---------------------------------------\\
+
 void jointCallback(const sensor_msgs::JointState::ConstPtr &_js){
 //translates ROS joint_states message to the global variable
 
@@ -78,7 +82,7 @@ void printJointState(sensor_msgs::JointState jointState_){
 	}
 }
 
-// -------------------------- Movement Templates -------------------------
+// -------------------------- Movement Templates ------------------------------\\
 
 sensor_msgs::JointState crouch(std::vector<std::string> jointName){
 //radians for each joint to get the robot on a crouching stance
@@ -160,10 +164,11 @@ sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, bool aux){
 	return jointState_;
 }
 
-//=========================== Mathematical functions =====================
+//=========================== Mathematical functions ==========================\\
 
 
-//--------------------------- Miscellaneous -----------------------------------
+//--------------------------- Miscellaneous -----------------------------------\\
+
 std::vector<float> cross(std::vector<float> v1, std::vector<float> v2){
 //creates a vector third perpendicular vector
 	std::vector<std::vector<float>> matrix(3,std::vector<float>(3));
@@ -189,7 +194,7 @@ std::vector<std::vector<float>> Trans(float a, float b, float c, float d){
 	return T;
 }
 
-//--------------------------- Theta handling ----------------------------------
+//--------------------------- Theta handling ----------------------------------\\
 
 std::vector<float> calculateTheta(std::string type, sensor_msgs::JointState jointState_){
 //search in a joint state variable for radian values on a specific type of joint
@@ -237,7 +242,7 @@ sensor_msgs::JointState insertTheta(std::vector<float> theta, sensor_msgs::Joint
 	return jointState_;
 }
 
-//--------------------------- Matrix-related ----------------------------------
+//--------------------------- Matrix-related ----------------------------------\\
 
 std::vector<std::vector<float>> matrixMulti(std::vector<std::vector<float>> m1, std::vector<std::vector<float>> m2){
 //multiplies two matrixes
@@ -368,7 +373,7 @@ std::vector<std::vector<float>> simplerMatrix(std::vector<std::vector<std::vecto
 	return matrix;
 }
 
-//--------------------------- Vector-related ----------------------------------
+//--------------------------- Vector-related ----------------------------------\\
 
 std::vector<float> vectorNumberMultiDiv(std::vector<float> vector, float number, bool aux){
 //divides or multiply a vector by a number
@@ -419,7 +424,7 @@ std::vector<float> elementWiseMultiplication(std::vector<float> a, std::vector<f
 	return array;
 }
 
-//--------------------------- Robot Cinematic ---------------------------------
+//--------------------------- Robot Cinematic ---------------------------------\\
 
 std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointState_){
 //calculates the point of each foot based on the radians of each joint
@@ -841,12 +846,13 @@ int main(int argc, char** argv){
 	// n.param("robot_description", robot_desc_string, std::string());
 
 
-	//======================= Testing Variables ===============================
+	//======================= Testing Variables ===============================\\
 	//can get very messy
 
 	// sensor_msgs::JointState crouchState = crouch(jointName);
 	// std::vector<std::vector<float>> footPos;
 	std::vector<std::vector<float>> objPoint;
+	
 	//---------------------------------------------------------
 	
 	bool stance = true;
@@ -856,7 +862,7 @@ int main(int argc, char** argv){
 
 	//testeState.position[2] = -.9;
 
-	//======================= The Magic Happens Here ==========================
+	//======================= The Magic Happens Here ==========================\\
 
 	//timing variables
 	ros::Time startingLoop = ros::Time::now();

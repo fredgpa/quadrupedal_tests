@@ -17,6 +17,7 @@
 
 #define PI 3.14159
 #define RATE 30
+#define F_ROT 2*PI
 
 //--------------------------- ROBOT PARAMETERS --------------------------------\\
 // currently for model2.urdf
@@ -180,6 +181,19 @@ std::vector<float> cross(std::vector<float> v1, std::vector<float> v2){
 	vector = {(matrix[1][1]*matrix[2][2] - matrix[1][2]*matrix[2][1]), (matrix[1][2]*matrix[2][0] - matrix[1][0]*matrix[2][2]), (matrix[1][0]*matrix[2][1] - matrix[1][1]*matrix[2][0])};
 
 	return vector;
+}
+
+float dot(std::vector<float> v1, std::vector<float> v2){
+//calculates the scalar product of two vectors
+	float value = 0;
+
+	if (v1.size() == v2.size())
+		for(int i = 0; i < v1.size(); i++)
+			value += v1[i]*v2[i];
+	else
+		ROS_ERROR("The vectors have different dimmensions!");
+
+	return value;
 }
 
 std::vector<std::vector<float>> Trans(float a, float b, float c, float d){
@@ -373,6 +387,28 @@ std::vector<std::vector<float>> simplerMatrix(std::vector<std::vector<std::vecto
 	return matrix;
 }
 
+std::vector<std::vector<float>> elementWiseMatrixMultiplication(std::vector<std::vector<float>> a, std::vector<std::vector<float>> b){
+//multiply every matrix element by its correspondant on the other (a[i][j]*b[i][j])
+	std::vector<std::vector<float>> array(a.size(), std::vector<float>(a[0].size()));
+
+	for(int i = 0; i < a.size(); i++)
+		for(int j = 0; j < a[0].size(); j++)
+			array[i][j] = a[i][j] * b[i][j];
+
+	return array;
+}
+
+float sumMatrix(std::vector<std::vector<float>> array){
+//sums all the values of a matrix
+	float result = 0;
+	for(int i = 0; i < array.size(); i++)
+		for(int j = 0; j < array[0].size(); j++)
+			result += array[i][j];
+	
+
+	return result;
+}
+
 //--------------------------- Vector-related ----------------------------------\\
 
 std::vector<float> vectorNumberMultiDiv(std::vector<float> vector, float number, bool aux){
@@ -391,7 +427,7 @@ std::vector<float> vectorNumberMultiDiv(std::vector<float> vector, float number,
 
 std::vector<float> vectorSumSub(std::vector<float> v1, std::vector<float> v2, bool aux){
 //sums or substracts two vectors
-	std::vector<float> vector(nLegs);
+	std::vector<float> vector(v1.size());
 
 	for(int i = 0; i < v1.size(); i++){
 		if (aux)
@@ -422,6 +458,101 @@ std::vector<float> elementWiseMultiplication(std::vector<float> a, std::vector<f
 		array[i] = a[i] * b[i];
 
 	return array;
+}
+
+//--------------------------- Quaternions -------------------------------------\\
+
+std::vector<float> createQuaternion(std::vector<float> vector){
+//create a quaternion array
+	float a = vector[0];
+	float alf = vector[1];
+	float d = vector[2];
+	float theta = vector[3];
+
+	float Am = cos(alf/2)*cos(theta/2);
+	float Bm = sin(alf/2)*cos(theta/2);
+	float Cm = sin(alf/2)*sin(theta/2);
+	float Dm = cos(alf/2)*sin(theta/2);	
+
+	std::vector<float> quaternion = {Am,
+									 Bm, 
+									 Cm, 
+									 Dm, 
+									 -(a/2)*Bm-(d/2)*Dm,
+									 (a/2)*Am-(d/2)*Cm,
+									 (a/2)*Dm+(d/2)*Bm,
+									 -(a/2)*Cm+(d/2)*Am};
+
+	return quaternion;
+}
+
+std::vector<float> QProduct(std::vector<float> q1, std::vector<float> q2){
+//calculate the product of two quaternion vectors
+	float q_Part1 = q1[0]*q2[0] - dot(
+									{q1[1], q1[2], q1[3]}, 
+									{q2[1], q2[2], q2[3]});
+
+	std::vector<float> q_Part2 = vectorSumSub(
+									vectorSumSub(
+										vectorNumberMultiDiv(
+											{q2[1], q2[2], q2[3]}, 
+											q1[0], 
+											true), 
+										vectorNumberMultiDiv(
+											{q1[1], q1[2], q1[3]}, 
+											q2[0], 
+											true), 
+										true), 
+								 cross(
+									{q1[1], q1[2], q1[3]}, 
+									{q2[1], q2[2], q2[3]}), 
+								 true);
+
+	std::vector<float> q(q_Part2.size() + 1);
+
+	q[0] = q_Part1;
+	for(int i = 1; i < q.size(); i++)
+		q[i] = q_Part2[i-1];
+
+	
+	
+
+	return q;
+}
+
+std::vector<float> QDualProduct(std::vector<float> q1, std::vector<float> q2){
+//calculate the dual product of two quaternions
+	std::vector<float> productPart1(q1.size());
+	productPart1 = QProduct(
+							{q1[0], q1[1], q1[2], q1[3]}, 
+							{q2[0], q2[1], q2[2], q2[3]});
+	std::vector<float> productPart2 = vectorSumSub(
+										QProduct(
+											{q1[0], q1[1], q1[2], q1[3]}, 
+											{q2[4], q2[5], q2[6], q2[7]}), 
+										QProduct(
+											{q1[4], q1[5], q1[6], q1[7]}, 
+											{q2[0], q2[1], q2[2], q2[3]}), 
+										true);
+
+	std::vector<float> product(productPart1.size() + productPart2.size());
+
+	for(int i = 0; i < productPart1.size(); i++)
+		product[i] = productPart1[i];
+
+	for(int i = productPart1.size(); i < product.size(); i++){
+		product[i] = productPart2[i - productPart1.size()];
+	}
+
+	return product;
+}
+
+std::vector<float> QConjugate(std::vector<float> q){
+//calculate the conjugate
+
+	std::vector<float> conjugate = {q[0], -q[1], -q[2], -q[3], -q[4], q[5], q[6], q[7]};
+
+	return conjugate;
 }
 
 //--------------------------- Robot Cinematic ---------------------------------\\
@@ -596,7 +727,7 @@ std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointSt
 	return Patas;
 }
 
-sensor_msgs::JointState inverseCinematic(sensor_msgs::JointState jointState_, std::vector<std::vector<float>> objPoint){//sensor_msgs::JointState jointState_){
+sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, ros::Rate r, sensor_msgs::JointState jointState_, std::vector<std::vector<float>> objPoint){//sensor_msgs::JointState jointState_){
 //calculates the trajectory of each joint to reach the objective point
 
 	// std::vector<float> theta1 = {0, 0, 0, 0};
@@ -698,17 +829,16 @@ sensor_msgs::JointState inverseCinematic(sensor_msgs::JointState jointState_, st
 
 	std::vector<std::vector<float>> Theta(4);
 
-	for(int i = 0; i < nLegs; i++){
+	// while
+	if(sumMatrix(elementWiseMatrixMultiplication(dx,dx)) >= .005){
 
-		float t1 = theta1[i];
-		float t2 = theta2[i];
-		float t3 = theta3[i];
+		for(int i = 0; i < nLegs; i++){
 
-		std::vector<float> dtheta;
-		
-		//std::vector<float> Theta;
+			float t1 = theta1[i];
+			float t2 = theta2[i];
+			float t3 = theta3[i];
 
-		while(sum(elementWiseMultiplication(dx[i],dx[i])) >= .001){
+			std::vector<float> dtheta;
 
 			std::vector<std::vector<float>> A01 = Trans(-shoulderLength, 0, 0, t1);
 			std::vector<std::vector<float>> A02 = Trans(0, PI/2, 0, -PI/2);
@@ -758,21 +888,35 @@ sensor_msgs::JointState inverseCinematic(sensor_msgs::JointState jointState_, st
 
 		}
 
-		float voltaCompleta = 2*PI;
-		for(int j = 0; j < 3; j++){
-			if(abs(Theta[i][j]) > voltaCompleta){
-				Theta[i][j] = std::fmod(Theta[i][j], voltaCompleta);
+		for(int i = 0; i < nLegs; i++){
+
+			for(int j = 0; j < 3; j++){
+				if(abs(Theta[i][j]) > F_ROT){
+					Theta[i][j] = std::fmod(Theta[i][j], F_ROT);
+				}
 			}
+
+			if(i == 0)			
+				jointState_ = insertTheta(Theta[i], jointState_, "right_back");
+			else if(i == 1)
+				jointState_ = insertTheta(Theta[i], jointState_, "right_front");
+			else if(i == 2)
+				jointState_ = insertTheta(Theta[i], jointState_, "left_front");
+			else
+				jointState_ = insertTheta(Theta[i], jointState_, "left_back");
 		}
 
-		if(i == 0)			
-			jointState_ = insertTheta(Theta[i], jointState_, "right_back");
-		else if(i == 1)
-			jointState_ = insertTheta(Theta[i], jointState_, "right_front");
-		else if(i == 2)
-			jointState_ = insertTheta(Theta[i], jointState_, "left_front");
-		else
-			jointState_ = insertTheta(Theta[i], jointState_, "left_back");
+		// for(int i = 0; i < nJoints; i++){
+		// 	std_msgs::Float64 msg;
+		// 	msg.data = jointState_.position[i];
+		// 	//msg.data = -.9;
+		// 	jointPub[i].publish(msg);
+		// }
+
+		// //controls the subscriber, asks for new messages to be received
+		// ros::spinOnce();
+		// //sleeps the necessary time to respect the specified rate value
+		// r.sleep();
 
 	}
 
@@ -800,6 +944,95 @@ sensor_msgs::JointState inverseCinematic(sensor_msgs::JointState jointState_, st
 
 
 	return jointState_;
+}
+
+std::vector<float> forwardCinematicQ(std::vector<float> q){
+
+	float t1 = 0;
+	float t2 = -60*PI/180;
+	float t3 = 30*PI/180;
+
+	std::vector<std::vector<float>> PDH = {{-bodyLength/2, PI/2, 0, 0},
+										   {0, 0, bodyWidth/2, 0},
+										   {0, PI/2, 0 , PI/2},
+										   {0, 0, 0, -PI/2},
+										   {-shoulderLength, 0, 0, t1},
+										   {0, PI/2, 0, -PI/2},
+										   {legLength, 0, 0, t2},
+										   {calfLength, 0, 0, t3}};
+
+
+	std::vector<std::vector<float>> h(PDH.size());
+	for(int i = 0; i < PDH.size(); i++)
+		h[i] = createQuaternion(PDH[i]);
+
+
+	std::vector<float> pe = {1, 0, 0, 0, 0 ,0 ,0 ,0};
+	
+	std::vector<float> p0e = h[0];
+	for(int i = 1; i < PDH.size(); i++){
+		std::cout << "p0e: " << std::endl;
+		std:: cout << p0e[0] << std::endl;
+		std:: cout << p0e[1] << std::endl;
+		std:: cout << p0e[2] << std::endl;
+		std:: cout << p0e[3] << std::endl;
+		std:: cout << p0e[4] << std::endl;
+		std:: cout << p0e[5] << std::endl;
+		std:: cout << p0e[6] << std::endl;
+		std:: cout << p0e[7] << std::endl;
+		p0e = QDualProduct(p0e, h[i]);
+	}
+
+	std::cout << "p0e: " << std::endl;
+	std:: cout << p0e[0] << std::endl;
+	std:: cout << p0e[1] << std::endl;
+	std:: cout << p0e[2] << std::endl;
+	std:: cout << p0e[3] << std::endl;
+	std:: cout << p0e[4] << std::endl;
+	std:: cout << p0e[5] << std::endl;
+	std:: cout << p0e[6] << std::endl;
+	std:: cout << p0e[7] << std::endl;
+
+
+	std::vector<float> p0eConj = QConjugate(p0e);
+
+	std::cout << "p0eConj: " << std::endl;
+	std:: cout << p0eConj[0] << std::endl;
+	std:: cout << p0eConj[1] << std::endl;
+	std:: cout << p0eConj[2] << std::endl;
+	std:: cout << p0eConj[3] << std::endl;
+	std:: cout << p0eConj[4] << std::endl;
+	std:: cout << p0eConj[5] << std::endl;
+	std:: cout << p0eConj[6] << std::endl;
+	std:: cout << p0eConj[7] << std::endl;
+
+	std::vector<float> P1 = QDualProduct(p0e, pe);
+
+	std::vector<float> Pfinal = QDualProduct(P1, p0eConj);
+
+	std::cout << "Pfinal: " << std::endl;
+	std:: cout << Pfinal[0] << std::endl;
+	std:: cout << Pfinal[1] << std::endl;
+	std:: cout << Pfinal[2] << std::endl;
+	std:: cout << Pfinal[3] << std::endl;
+	std:: cout << Pfinal[4] << std::endl;
+	std:: cout << Pfinal[5] << std::endl;
+	std:: cout << Pfinal[6] << std::endl;
+	std:: cout << Pfinal[7] << std::endl;
+
+	P1 = vectorSumSub(Pfinal, q, true);
+
+	std::cout << "P1: " << std::endl;
+	std:: cout << P1[0] << std::endl;
+	std:: cout << P1[1] << std::endl;
+	std:: cout << P1[2] << std::endl;
+	std:: cout << P1[3] << std::endl;
+	std:: cout << P1[4] << std::endl;
+	std:: cout << P1[5] << std::endl;
+	std:: cout << P1[6] << std::endl;
+	std:: cout << P1[7] << std::endl;
+
+	return P1;
 }
 
 
@@ -860,44 +1093,47 @@ int main(int argc, char** argv){
 
 	//printJointState(testeState);
 
+	forwardCinematicQ({0, 0, 0, 0, 0, 0, 0, .5});
+
 	//testeState.position[2] = -.9;
 
 	//======================= The Magic Happens Here ==========================\\
 
 	//timing variables
-	ros::Time startingLoop = ros::Time::now();
-	ros::Time cycle = ros::Time::now();
-	while(ros::ok()){
+	// ros::Time startingLoop = ros::Time::now();
+	// ros::Time cycle = ros::Time::now();
+	// while(ros::ok()){
 
-		//starts the walking sequence after 5 seconds of loop
-		if(ros::Time::now().toSec() - startingLoop.toSec() > 5){
-			//changes legs after .8 seconds
-			if(ros::Time::now().toSec() - cycle.toSec() >= .8){
-				cycle = ros::Time::now();
-				stance = !stance;
-			}
-			testeState = showOff(crouch(jointName), stance);
-			objPoint = forwardCinematic(testeState);
-			testeState = inverseCinematic(crouch(jointName), objPoint);
-		}
-
-
-		//starts publishing only after the first joint state message was received
-		if(jointState.header.seq != 0){
-			for(int i = 0; i < nJoints; i++){
-				std_msgs::Float64 msg;
-				msg.data = testeState.position[i];
-				//msg.data = -.9;
-				jointPub[i].publish(msg);
-			}
-		}
+	// 	//starts the walking sequence after 5 seconds of loop
+	// 	if(ros::Time::now().toSec() - startingLoop.toSec() > 5){
+	// 		//changes legs after .8 seconds
+	// 		if(ros::Time::now().toSec() - cycle.toSec() >= .8){
+	// 			cycle = ros::Time::now();
+	// 			stance = !stance;
+	// 			testeState = showOff(crouch(jointName), stance);
+	// 		}
+			
+	// 		objPoint = forwardCinematic(testeState);
+	// 		testeState = inverseCinematic(jointPub, r, testeState, objPoint);
+	// 	}
 
 
-		//controls the subscriber, asks for new messages to be received
-		ros::spinOnce();
-		//sleeps the necessary time to respect the specified rate value
-		r.sleep();
+	// 	//starts publishing only after the first joint state message was received
+	// 	if(jointState.header.seq != 0){
+	// 		for(int i = 0; i < nJoints; i++){
+	// 			std_msgs::Float64 msg;
+	// 			msg.data = testeState.position[i];
+	// 			//msg.data = -.9;
+	// 			jointPub[i].publish(msg);
+	// 		}
+	// 	}
 
-	}
+
+	// 	//controls the subscriber, asks for new messages to be received
+	// 	ros::spinOnce();
+	// 	//sleeps the necessary time to respect the specified rate value
+	// 	r.sleep();
+
+	// }
 
 }

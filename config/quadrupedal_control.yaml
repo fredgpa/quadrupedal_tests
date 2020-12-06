@@ -9,82 +9,82 @@ quadrupedal_test:
   left_front_leg_shoulder_rotate_controller:
     type: "my_controller/MyPositionController"
     joint: left_front_leg_shoulder_rotate
-    gain: 1000
+    gain: 10000
 
   right_front_leg_shoulder_rotate_controller:
     type: "my_controller/MyPositionController"
     joint: right_front_leg_shoulder_rotate
-    gain: 1000  
+    gain: 10000  
 
   left_back_leg_shoulder_rotate_controller:
     type: "my_controller/MyPositionController"
     joint: left_back_leg_shoulder_rotate
-    gain: 1000
+    gain: 10000
 
   right_back_leg_shoulder_rotate_controller:
     type: "my_controller/MyPositionController"
     joint: right_back_leg_shoulder_rotate
-    gain: 1000
+    gain: 10000
 
   left_front_leg_shoulder_hinge_controller:
     type: "my_controller/MyPositionController"
     joint: left_front_leg_shoulder_hinge
-    gain: 1000
+    gain: 10000
 
   right_front_leg_shoulder_hinge_controller:
     type: "my_controller/MyPositionController"
     joint: right_front_leg_shoulder_hinge
-    gain: 1000
+    gain: 10000
 
   left_back_leg_shoulder_hinge_controller:
     type: "my_controller/MyPositionController"
     joint: left_back_leg_shoulder_hinge
-    gain: 1000
+    gain: 10000
 
   right_back_leg_shoulder_hinge_controller:
     type: "my_controller/MyPositionController"
     joint: right_back_leg_shoulder_hinge
-    gain: 1000
+    gain: 10000
 
   left_front_leg_elbow_hinge_controller:
     type: "my_controller/MyPositionController"
     joint: left_front_leg_elbow_hinge
-    gain: 1000
+    gain: 10000
 
   right_front_leg_elbow_hinge_controller:
     type: "my_controller/MyPositionController"
     joint: right_front_leg_elbow_hinge
-    gain: 1000
+    gain: 10000
 
   left_back_leg_elbow_hinge_controller:
     type: "my_controller/MyPositionController"
     joint: left_back_leg_elbow_hinge
-    gain: 1000
+    gain: 10000
 
   right_back_leg_elbow_hinge_controller:
     type: "my_controller/MyPositionController"
     joint: right_back_leg_elbow_hinge
-    gain: 1000
+    gain: 10000
 
 #  left_front_calf_elbow_hinge_controller:
 #    type: "my_controller/MyPositionController"
 #    joint: left_front_calf_elbow_hinge
-#    gain: 1000
+#    gain: 10000
 
 #  right_front_calf_elbow_hinge_controller:
 #    type: "my_controller/MyPositionController"
 #    joint: right_front_calf_elbow_hinge
-#    gain: 1000
+#    gain: 10000
 
 #  left_back_calf_elbow_hinge_controller:
 #    type: "my_controller/MyPositionController"
 #    joint: left_back_calf_elbow_hinge
-#    gain: 1000
+#    gain: 10000
 
 #  right_back_calf_elbow_hinge_controller:
 #    type: "my_controller/MyPositionController"
 #    joint: right_back_calf_elbow_hinge
-#    gain: 1000
+#    gain: 10000
 
   
 

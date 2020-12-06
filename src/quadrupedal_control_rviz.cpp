@@ -54,7 +54,6 @@ std::vector<std::string> jointName= {"left_front_leg_shoulder_rotate", "right_fr
 
 //--------------------------- Variable to receive robot info ------------------\\
 
-sensor_msgs::JointState jointState;
 std::string TrbMoving;
 std::string TrfMoving;
 std::string TlfMoving;
@@ -66,19 +65,7 @@ std::string TlbMoving;
 
 // -------------------------- ROS Stuff ---------------------------------------\\
 
-void jointCallback(const sensor_msgs::JointState::ConstPtr &_js){
-//translates ROS joint_states message to the global variable
 
-	jointState.header.seq = _js->header.seq;
-	jointState.header.stamp = _js->header.stamp;
-	jointState.header.frame_id = _js->header.frame_id;
-
-	for(size_t i = 0; i < nJoints; i++){
-		//
-		jointState.name[i] = _js->name[i];		
-		jointState.position[i] = _js->position[i];
-	}
-}
 
 void legCallbackTrb(const std_msgs::String::ConstPtr& msg){
 
@@ -198,7 +185,7 @@ sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, bool aux){
 }
 
 
-std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vector<float>> currentPoint){
+std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vector<float>> currentPoint, std::vector<std::vector<float>> zeroPoint){
 //returns the foot position in function of time variable
 	std::vector<std::vector<float>> point(nLegs);
 	//2.1 segundos uma passada completa
@@ -218,7 +205,7 @@ std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vect
 	for(int i = 0; i < nLegs; i++){
 		// std::cout << instant << std::endl;
 
-		x = currentPoint[i][0];//calculate z
+		x = zeroPoint[i][0];//calculate z
 		y = currentPoint[i][1];
 		z = currentPoint[i][2];
 
@@ -243,22 +230,16 @@ std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vect
 			// std::cout << z << std::endl;
 			// std::cout << "-------------------------------" << std::endl;
 
-			if(z <= 0)
+			if(z <= 0){
 				z = 0;
-			else{
+
+				//x += .2;
+
+			}else{
 				if(z > .2)
 					z = .2;
-
-					// if( i == 1 || i == 2)
-				// x += .2;
-					// else
-					// 	x -= .2;
-					// else
-				 // 		x -= .1;
-
 			}
 		}
-
 
 		point[i] = {x, y, z};
 	}
@@ -824,7 +805,7 @@ std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointSt
 	return Patas;
 }
 
-sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, ros::Rate r, sensor_msgs::JointState jointState_, std::vector<std::vector<float>> objPoint){//sensor_msgs::JointState jointState_){
+sensor_msgs::JointState inverseCinematic(sensor_msgs::JointState jointState_, std::vector<std::vector<float>> objPoint){//sensor_msgs::JointState jointState_){
 //calculates the trajectory of each joint to reach the objective point
 
 	// std::vector<float> theta1 = {0, 0, 0, 0};
@@ -1153,7 +1134,7 @@ std::vector<float> forwardCinematicQ(sensor_msgs::JointState jointState_){
 int main(int argc, char** argv){
 
 	//starts the program ROS Node
-	ros::init(argc, argv, "controllerTesting");
+	ros::init(argc, argv, "controllerTesting_rviz");
 	ros::NodeHandle n;
 
 
@@ -1167,22 +1148,7 @@ int main(int argc, char** argv){
 	}
 
 	//creating the publishers that will send our info back to ROS server
-	std::vector<ros::Publisher> jointPub(nJoints);
-	ros::Publisher legFrequencyStart = n.advertise<std_msgs::String>("/quadrupedal_test/flag", 1000);
-
-	//preparing the global state variable
-	jointState.name.resize(nJoints);
-	jointState.position.resize(nJoints);
-
-	//arranging the joint names based on rostopic (alphabetically)
-	std::sort(jointName.begin(), jointName.end());
-
-	//assign each publisher to a joint
-	for(int i = 0; i < nJoints; i++)
-		jointPub[i] = n.advertise<std_msgs::Float64>("/quadrupedal_test/" + jointName[i] + "_controller/command", 5);
-	
-	//create the subscriber and subscribes to the joint_states topic
-	ros::Subscriber sub = n.subscribe("/quadrupedal_test/joint_states", 1, jointCallback);
+	ros::Publisher jointPub = n.advertise<sensor_msgs::JointState>("joint_states", 1);
 	
 	//set a rate to control the loop	
 	ros::Rate r(RATE);
@@ -1210,6 +1176,8 @@ int main(int argc, char** argv){
 	
 	bool stance = true;
 	sensor_msgs::JointState testeState = crouch(jointName);
+	sensor_msgs::JointState crouchState = crouch(jointName);
+	std::vector<std::vector<float>> zeroPoint = forwardCinematic(crouchState);
 
 	//printJointState(testeState);
 
@@ -1230,37 +1198,23 @@ int main(int argc, char** argv){
 		if(ros::Time::now().toSec() - startingLoop.toSec() >= 5){
 			// std::cout << ros::Time::now().toSec() - startingLoop.toSec() << std::endl;
 
-			legFrequencyStart.publish(legMsg);
-
 			currentPoint = forwardCinematic(testeState);
 
-			objPoint = sinWalking(ros::Time::now().toSec() - startingLoop.toSec() - 5, currentPoint);
+			objPoint = sinWalking(ros::Time::now().toSec() - startingLoop.toSec() - 5, currentPoint, zeroPoint);
 
 			// std::cout << objPoint[1][0] << std::endl;
 			// std::cout << objPoint[1][1] << std::endl;
 			// std::cout << objPoint[1][2] << std::endl;
 			
-			testeState = inverseCinematic(jointPub, r, testeState, objPoint);
+			testeState = inverseCinematic(testeState, objPoint);
 
 			// break;
 		}
 
-		
+		testeState.header.stamp = ros::Time::now();
 
+		jointPub.publish(testeState);
 
-		//starts publishing only after the first joint state message was received
-		if(jointState.header.seq != 0){
-			for(int i = 0; i < nJoints; i++){
-				std_msgs::Float64 msg;
-				msg.data = testeState.position[i];
-				//msg.data = -.9;
-				jointPub[i].publish(msg);
-			}
-		}
-
-
-		//controls the subscriber, asks for new messages to be received
-		ros::spinOnce();
 		//sleeps the necessary time to respect the specified rate value
 		r.sleep();
 

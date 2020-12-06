@@ -39,14 +39,14 @@ bool once = true;
 
 void flagCallback(const std_msgs::String::ConstPtr& msg){
 
-	if(once){
-		start = ros::Time::now();
-		once = !once;
-	}
 	flag = msg->data.c_str();
 
-	Trb = ros::Time::now();
-	TrbMoving = true;
+	if(once){
+		start = ros::Time::now();
+		Trb = ros::Time::now();
+		TrbMoving = true;
+		once = false;
+	}
 }
 
 int main(int argc, char** argv){
@@ -85,23 +85,29 @@ int main(int argc, char** argv){
 
 		if(flag == "start"){
 
-			std::cout << ros::Time::now().toSec() << std::endl;
-			std::cout << Trb.toSec() << std::endl;
-			if(Trb.toSec() - ros::Time::now().toSec() >= 2*.167 && aux1){
+			//std::cout << ros::Time::now().toSec() << std::endl;
+			//std::cout << Trb.toSec() << std::endl;
+			if(ros::Time::now().toSec() - start.toSec() >= 2*.167 && aux1){
+				std::cout << "liberou perna 2" << std::endl;
 				Tlf = ros::Time::now();
 				TlfMoving = true;
-			}else if(Trb.toSec() - ros::Time::now().toSec() >= 4*.167 && aux2){
+				aux1 = false;
+			}else if(ros::Time::now().toSec() - start.toSec() >= 4*.167 && aux2){
+				std::cout << "liberou perna 3" << std::endl;
 				Trf = ros::Time::now();
 				TrfMoving = true;
-			}else if(Trb.toSec() - ros::Time::now().toSec() >= 6*.167 && aux3){
+				aux2 = false;
+			}else if(ros::Time::now().toSec() - start.toSec() >= 6*.167 && aux3){
+				std::cout << "liberou perna 4" << std::endl;
 				Tlb = ros::Time::now();
 				TlbMoving = true;
+				aux3 = false;
 			}
 
 
 			//Right Back Leg
 			if(TrbMoving){
-				if(Trb.toSec() - ros::Time::now().toSec() < .5){
+				if(ros::Time::now().toSec() - Trb.toSec() < .5){
 
 					ss << "move";
 					msg.data = ss.str();
@@ -111,7 +117,7 @@ int main(int argc, char** argv){
 					TrbMoving = false;
 				}
 			}else{
-				if(Trb.toSec() - ros::Time::now().toSec() < 5*.167){
+				if(ros::Time::now().toSec() - Trb.toSec() < 5*.167){
 
 					ss << "stop";
 					msg.data = ss.str();
@@ -124,21 +130,21 @@ int main(int argc, char** argv){
 
 			//Right Front Leg
 			if(TrfMoving){
-				if(Trf.toSec() - ros::Time::now().toSec() < .5){
+				if(ros::Time::now().toSec() - Trf.toSec() < .5){
 
 					ss << "move";
 					msg.data = ss.str();
-					legPub[0].publish(msg);
+					legPub[1].publish(msg);
 				}else{
 					Trf = ros::Time::now();
 					TrfMoving = false;
 				}
 			}else{
-				if(Trf.toSec() - ros::Time::now().toSec() < 5*.167){
+				if(ros::Time::now().toSec() - Trf.toSec() < 5*.167){
 
 					ss << "stop";
 					msg.data = ss.str();
-					legPub[0].publish(msg);
+					legPub[1].publish(msg);
 				}else{
 					Trf = ros::Time::now();
 					TrfMoving = true;
@@ -147,21 +153,21 @@ int main(int argc, char** argv){
 
 			//Left Front Leg
 			if(TlfMoving){
-				if(Tlf.toSec() - ros::Time::now().toSec() < .5){
+				if(ros::Time::now().toSec() - Tlf.toSec() < .5){
 
 					ss << "move";
 					msg.data = ss.str();
-					legPub[0].publish(msg);
+					legPub[2].publish(msg);
 				}else{
 					Tlf = ros::Time::now();
 					TlfMoving = false;
 				}
 			}else{
-				if(Tlf.toSec() - ros::Time::now().toSec() < 5*.167){
+				if(ros::Time::now().toSec() - Tlf.toSec() < 5*.167){
 
 					ss << "stop";
 					msg.data = ss.str();
-					legPub[0].publish(msg);
+					legPub[2].publish(msg);
 				}else{
 					Tlf = ros::Time::now();
 					TlfMoving = true;
@@ -171,21 +177,21 @@ int main(int argc, char** argv){
 
 			//Left Back Leg
 			if(TlbMoving){
-				if(Tlb.toSec() - ros::Time::now().toSec() < .5){
+				if(ros::Time::now().toSec() - Tlb.toSec() < .5){
 
 					ss << "move";
 					msg.data = ss.str();
-					legPub[0].publish(msg);
+					legPub[3].publish(msg);
 				}else{
 					Tlb = ros::Time::now();
 					TlbMoving = false;
 				}
 			}else{
-				if(Tlb.toSec() - ros::Time::now().toSec() < 5*.167){
+				if(ros::Time::now().toSec() - Tlb.toSec() < 5*.167){
 
 					ss << "stop";
 					msg.data = ss.str();
-					legPub[0].publish(msg);
+					legPub[3].publish(msg);
 				}else{
 					Tlb = ros::Time::now();
 					TlbMoving = true;

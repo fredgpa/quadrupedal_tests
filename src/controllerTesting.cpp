@@ -10,13 +10,14 @@
 
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
+#include "std_msgs/String.h"
 
 //=========================== VARIABLES =======================================\\
 
 //--------------------------- Constants ---------------------------------------\\
 
 #define PI 3.14159
-#define RATE 30
+#define RATE 100
 #define F_ROT 2*PI
 
 //--------------------------- ROBOT PARAMETERS --------------------------------\\
@@ -34,10 +35,11 @@ static const float weight = 100;
 
 static const float omega = 0;
 static const float phi = 0;
-static const float psi = PI/6;
+static const float psi = 0;
 static const float xm = 0;
 static const float ym = 0;
 static const float zm = .8;
+static const std::vector<float> cm = {xm, ym, zm};
 
 
 //--------------------------- Joint Names -------------------------------------\\
@@ -100,12 +102,12 @@ sensor_msgs::JointState crouch(std::vector<std::string> jointName){
 			jointState_.position[i] = 0;
 
 		}else if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
-			if(jointState_.name[i].find("left") != std::string::npos)
+			if(jointState_.name[i].find("left_front") != std::string::npos || jointState_.name[i].find("right_back") != std::string::npos)
 				jointState_.position[i] = -.28;
 			else
 				jointState_.position[i] = .28;			
 		}else if(jointState_.name[i].find("_leg_elbow") != std::string::npos){
-			if(jointState_.name[i].find("left") != std::string::npos)
+			if(jointState_.name[i].find("left_front") != std::string::npos || jointState_.name[i].find("right_back") != std::string::npos)
 				jointState_.position[i] = .6;
 			else
 				jointState_.position[i] = -.6;
@@ -163,6 +165,50 @@ sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, bool aux){
 	}
 
 	return jointState_;
+}
+
+std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vector<float>> currentPoint, std::vector<ros::Publisher> jointPub){
+//returns the foot position in function of time variable
+	std::vector<std::vector<float>> point(nLegs);
+	//2.1 segundos uma passada completa
+	std::vector<float> legTiming = {4*.167, 0, 2*.167, 6*.167};
+
+
+	float x;
+	float y;
+	float z;
+
+	for(int i = 0; i < nLegs; i++){
+		// std::cout << instant << std::endl;
+
+		if(instant >= legTiming[i]){
+
+			x = currentPoint[i][0];//calculate z
+			y = currentPoint[i][1];
+			z = sin((instant-legTiming[i])*6)*.4;
+
+			// std::cout << z << std::endl;
+			// std::cout << "-------------------------------" << std::endl;
+
+			if(z <= 0)
+				z = 0;
+			else{
+				if(z > .2)
+					z = .2;
+
+				if(i < 2)
+					x += .02; //calculate x
+				else
+				 	x -= .02;
+			}
+		}
+
+
+		point[i] = {x, y, z};
+	}
+
+	return point;
+
 }
 
 //=========================== Mathematical functions ==========================\\
@@ -566,12 +612,6 @@ std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointSt
 	std::vector<float> theta1 = calculateTheta("shoulder_hinge", jointState_);
 	std::vector<float> theta2 = calculateTheta("shoulder_rotate", jointState_);
 	std::vector<float> theta3 = calculateTheta("elbow_hinge", jointState_);
-	
-
-	std::vector<float> cm(3);
-	cm[0] = xm;
-	cm[1] = ym;
-	cm[2] = zm;
 
 	
 	//calculation initiates------------------------------
@@ -738,11 +778,6 @@ sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, r
 	std::vector<float> theta2 = calculateTheta("shoulder_rotate", jointState_);
 	std::vector<float> theta3 = calculateTheta("elbow_hinge", jointState_);
 	
-
-	std::vector<float> cm(3);
-	cm[0] = xm;
-	cm[1] = ym;
-	cm[2] = zm;
 
 	std::vector<std::vector<float>> dx = objPoint;
 
@@ -946,93 +981,113 @@ sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, r
 	return jointState_;
 }
 
-std::vector<float> forwardCinematicQ(std::vector<float> q){
+std::vector<float> forwardCinematicQ(sensor_msgs::JointState jointState_){
+//calculates the point of each foot based on the radians of each joint
 
-	float t1 = 0;
-	float t2 = -60*PI/180;
-	float t3 = 30*PI/180;
+	std::vector<float> theta1 = {0, 0, 0, 0};
+	std::vector<float> theta2 = {-60*PI/180, -60*PI/180, 60*PI/180, 60*PI/180};
+	std::vector<float> theta3 = {30*PI/180, 30*PI/180, -30*PI/180, -30*PI/180};
+	// initial leg angle
+	// std::vector<float> theta1 = calculateTheta("shoulder_hinge", jointState_);
+	// std::vector<float> theta2 = calculateTheta("shoulder_rotate", jointState_);
+	// std::vector<float> theta3 = calculateTheta("elbow_hinge", jointState_);
 
-	std::vector<std::vector<float>> PDH = {{-bodyLength/2, PI/2, 0, 0},
-										   {0, 0, bodyWidth/2, 0},
-										   {0, PI/2, 0 , PI/2},
-										   {0, 0, 0, -PI/2},
+	std::vector<std::vector<float>> linha1 = {{-bodyLength/2, PI/2, 0, 0},
+											  {bodyLength/2, PI/2, 0, 0},
+											  {bodyLength/2, -PI/2, 0, 0},
+											  {-bodyLength/2, -PI/2, 0, 0}};
+
+	std::vector<float> linha2 = {0, 0, bodyWidth/2, 0};
+
+	std::vector<std::vector<float>> linha3 = {{0, PI/2, 0, PI/2},
+											  {0, PI/2, 0, PI/2},
+											  {0, -PI/2, 0, PI/2},
+											  {0, -PI/2, 0, PI/2}};
+
+  	std::vector<std::vector<float>> linha4 = {{0, 0, 0, -PI/2},
+											  {0, 0, 0, -PI/2},
+											  {0, 0, 0, PI/2},
+											  {0, 0, 0, PI/2}};
+
+	
+
+
+
+	std::vector<float> R_omega = {cos(omega/2), sin(omega/2), 0, 0, 0, 0, 0, 0};
+	std::vector<float> R_phi = {cos(phi/2), 0, sin(phi/2), 0, 0, 0, 0, 0};
+	std::vector<float> R_psi = {cos(psi/2), 0, 0, sin(psi/2), 0, 0, 0, 0};
+
+	std::vector<std::vector<float>> P01quadril(nLegs);
+	std::vector<std::vector<float>> P02quadril(nLegs);
+	std::vector<std::vector<float>> Pjoelho(nLegs);
+	std::vector<std::vector<float>> Ppata(nLegs);
+
+	for(int i = 0; i < nLegs; i++){
+
+		float t1 = theta1[i];
+		float t2 = theta2[i];
+		float t3 = theta3[i];
+		std::vector<float> p0 = {0, 0, 0, 0, 0, xm, ym, zm};
+		std::vector<float> pe = {1, 0, 0, 0, 0, 0, 0, 0};
+
+
+		std::vector<std::vector<float>> PDH = {{linha1[i][0], linha1[i][1], linha1[i][2], linha1[i][3]},
+										   {linha2[0], linha2[1], linha2[2], linha2[3]},
+										   {linha3[i][0], linha3[i][1], linha3[i][2], linha3[i][3]},
+										   {linha4[i][0], linha4[i][1], linha4[i][2], linha4[i][3]},
 										   {-shoulderLength, 0, 0, t1},
 										   {0, PI/2, 0, -PI/2},
 										   {legLength, 0, 0, t2},
 										   {calfLength, 0, 0, t3}};
 
 
-	std::vector<std::vector<float>> h(PDH.size());
-	for(int i = 0; i < PDH.size(); i++)
-		h[i] = createQuaternion(PDH[i]);
+		std::vector<std::vector<float>> h(PDH.size());
+		for(int j = 0; j < PDH.size(); j++)
+			h[j] = createQuaternion(PDH[j]);
 
+		std::vector<float> p0e = QDualProduct(R_omega, R_phi);
+		p0e = QDualProduct(p0e, R_psi);
+		p0e = QDualProduct(p0e, h[0]);
 
-	std::vector<float> pe = {1, 0, 0, 0, 0 ,0 ,0 ,0};
-	
-	std::vector<float> p0e = h[0];
-	for(int i = 1; i < PDH.size(); i++){
-		std::cout << "p0e: " << std::endl;
-		std:: cout << p0e[0] << std::endl;
-		std:: cout << p0e[1] << std::endl;
-		std:: cout << p0e[2] << std::endl;
-		std:: cout << p0e[3] << std::endl;
-		std:: cout << p0e[4] << std::endl;
-		std:: cout << p0e[5] << std::endl;
-		std:: cout << p0e[6] << std::endl;
-		std:: cout << p0e[7] << std::endl;
-		p0e = QDualProduct(p0e, h[i]);
+		//quadril
+		for(int j = 1; j < 4; j++)
+			p0e = QDualProduct(p0e, h[j]);
+
+		std::vector<float> p0eConj = QConjugate(p0e);
+
+		std::vector<float> P1 = QDualProduct(p0e, pe);
+
+		P01quadril[i] = QDualProduct(P1, p0eConj);
+		P01quadril[i] = vectorSumSub(P01quadril[i], p0, true);
+
+		//lateral do quadril
+		for(int j = 4; j < 6; j++)
+			p0e = QDualProduct(p0e, h[j]);
+
+		p0eConj = QConjugate(p0e);
+		P1 = QDualProduct(p0e, pe);
+		P02quadril[i] = QDualProduct(P1, p0eConj);
+		P02quadril[i] = vectorSumSub(P02quadril[i], p0, true);
+
+		//joelho
+		p0e = QDualProduct(p0e, h[6]);
+		p0eConj = QConjugate(p0e);
+		P1 = QDualProduct(p0e, pe);
+		Pjoelho[i] = QDualProduct(P1, p0eConj);
+		Pjoelho[i] = vectorSumSub(Pjoelho[i], p0, true);
+
+		//pata
+		p0e = QDualProduct(p0e, h[7]);
+		p0eConj = QConjugate(p0e);
+		P1 = QDualProduct(p0e, pe);
+		Ppata[i] = QDualProduct(P1, p0eConj);
+		Ppata[i] = vectorSumSub(Ppata[i], p0, true);
+ 
 	}
 
-	std::cout << "p0e: " << std::endl;
-	std:: cout << p0e[0] << std::endl;
-	std:: cout << p0e[1] << std::endl;
-	std:: cout << p0e[2] << std::endl;
-	std:: cout << p0e[3] << std::endl;
-	std:: cout << p0e[4] << std::endl;
-	std:: cout << p0e[5] << std::endl;
-	std:: cout << p0e[6] << std::endl;
-	std:: cout << p0e[7] << std::endl;
 
 
-	std::vector<float> p0eConj = QConjugate(p0e);
-
-	std::cout << "p0eConj: " << std::endl;
-	std:: cout << p0eConj[0] << std::endl;
-	std:: cout << p0eConj[1] << std::endl;
-	std:: cout << p0eConj[2] << std::endl;
-	std:: cout << p0eConj[3] << std::endl;
-	std:: cout << p0eConj[4] << std::endl;
-	std:: cout << p0eConj[5] << std::endl;
-	std:: cout << p0eConj[6] << std::endl;
-	std:: cout << p0eConj[7] << std::endl;
-
-	std::vector<float> P1 = QDualProduct(p0e, pe);
-
-	std::vector<float> Pfinal = QDualProduct(P1, p0eConj);
-
-	std::cout << "Pfinal: " << std::endl;
-	std:: cout << Pfinal[0] << std::endl;
-	std:: cout << Pfinal[1] << std::endl;
-	std:: cout << Pfinal[2] << std::endl;
-	std:: cout << Pfinal[3] << std::endl;
-	std:: cout << Pfinal[4] << std::endl;
-	std:: cout << Pfinal[5] << std::endl;
-	std:: cout << Pfinal[6] << std::endl;
-	std:: cout << Pfinal[7] << std::endl;
-
-	P1 = vectorSumSub(Pfinal, q, true);
-
-	std::cout << "P1: " << std::endl;
-	std:: cout << P1[0] << std::endl;
-	std:: cout << P1[1] << std::endl;
-	std:: cout << P1[2] << std::endl;
-	std:: cout << P1[3] << std::endl;
-	std:: cout << P1[4] << std::endl;
-	std:: cout << P1[5] << std::endl;
-	std:: cout << P1[6] << std::endl;
-	std:: cout << P1[7] << std::endl;
-
-	return P1;
+	return Ppata[0];
 }
 
 
@@ -1056,6 +1111,7 @@ int main(int argc, char** argv){
 
 	//creating the publishers that will send our info back to ROS server
 	std::vector<ros::Publisher> jointPub(nJoints);
+	ros::Publisher legFrequencyStart = n.advertise<std_msgs::String>("/quadrupedal_test/flag", 1000);
 
 	//preparing the global state variable
 	jointState.name.resize(nJoints);
@@ -1085,6 +1141,13 @@ int main(int argc, char** argv){
 	// sensor_msgs::JointState crouchState = crouch(jointName);
 	// std::vector<std::vector<float>> footPos;
 	std::vector<std::vector<float>> objPoint;
+	std::vector<std::vector<float>> currentPoint;
+
+	
+	std::stringstream ss;
+	ss << "start";
+	std_msgs::String legMsg;
+	legMsg.data = ss.str();
 	
 	//---------------------------------------------------------
 	
@@ -1093,47 +1156,76 @@ int main(int argc, char** argv){
 
 	//printJointState(testeState);
 
-	forwardCinematicQ({0, 0, 0, 0, 0, 0, 0, .5});
+	//forwardCinematicQ(testeState);
 
 	//testeState.position[2] = -.9;
 
 	//======================= The Magic Happens Here ==========================\\
 
 	//timing variables
-	// ros::Time startingLoop = ros::Time::now();
-	// ros::Time cycle = ros::Time::now();
-	// while(ros::ok()){
+	ros::Time startingLoop = ros::Time::now();
+	ros::Time cycle = ros::Time::now();
 
-	// 	//starts the walking sequence after 5 seconds of loop
-	// 	if(ros::Time::now().toSec() - startingLoop.toSec() > 5){
-	// 		//changes legs after .8 seconds
-	// 		if(ros::Time::now().toSec() - cycle.toSec() >= .8){
-	// 			cycle = ros::Time::now();
-	// 			stance = !stance;
-	// 			testeState = showOff(crouch(jointName), stance);
-	// 		}
+
+
+	while(ros::ok()){
+
+		//starts the walking sequence after 5 seconds of loop
+		if(ros::Time::now().toSec() - startingLoop.toSec() > 5){
+			legFrequencyStart.publish(legMsg);
+			//changes legs after .8 seconds
+			//if(ros::Time::now().toSec() - cycle.toSec() >= .8){
+				cycle = ros::Time::now();
+				//stance = !stance;
+				//testeState = showOff(crouch(jointName), stance);
+			//}
+			currentPoint = forwardCinematic(testeState);
+			// std::cout << "Ponto da perna 0: " << std::endl;
+			// std::cout << objPoint[0][0] << std::endl;
+			// std::cout << objPoint[0][1] << std::endl;
+			// std::cout << objPoint[0][2] << std::endl;
+
+			objPoint = sinWalking(cycle.toSec() - 5, currentPoint, jointPub);
+
+			std::cout << "Trb: " << std::endl;
+			std::cout << objPoint[0][0] << std::endl;
+			std::cout << objPoint[0][1] << std::endl;
+			std::cout << objPoint[0][2] << std::endl;
+			// std::cout << "Trf: " << std::endl;
+			// std::cout << objPoint[1][0] << std::endl;
+			// std::cout << objPoint[1][1] << std::endl;
+			// std::cout << objPoint[1][2] << std::endl;
+			// std::cout << "Tlf: " << std::endl;
+			// std::cout << objPoint[2][0] << std::endl;
+			// std::cout << objPoint[2][1] << std::endl;
+			// std::cout << objPoint[2][2] << std::endl;
+			// std::cout << "Tlb: " << std::endl;
+			// std::cout << objPoint[3][0] << std::endl;
+			// std::cout << objPoint[3][1] << std::endl;
+			// std::cout << objPoint[3][2] << std::endl;
 			
-	// 		objPoint = forwardCinematic(testeState);
-	// 		testeState = inverseCinematic(jointPub, r, testeState, objPoint);
-	// 	}
+			testeState = inverseCinematic(jointPub, r, testeState, objPoint);
+		}
+
+		
 
 
-	// 	//starts publishing only after the first joint state message was received
-	// 	if(jointState.header.seq != 0){
-	// 		for(int i = 0; i < nJoints; i++){
-	// 			std_msgs::Float64 msg;
-	// 			msg.data = testeState.position[i];
-	// 			//msg.data = -.9;
-	// 			jointPub[i].publish(msg);
-	// 		}
-	// 	}
+		//starts publishing only after the first joint state message was received
+		if(jointState.header.seq != 0){
+			for(int i = 0; i < nJoints; i++){
+				std_msgs::Float64 msg;
+				msg.data = testeState.position[i];
+				//msg.data = -.9;
+				jointPub[i].publish(msg);
+			}
+		}
 
 
-	// 	//controls the subscriber, asks for new messages to be received
-	// 	ros::spinOnce();
-	// 	//sleeps the necessary time to respect the specified rate value
-	// 	r.sleep();
+		//controls the subscriber, asks for new messages to be received
+		ros::spinOnce();
+		//sleeps the necessary time to respect the specified rate value
+		r.sleep();
 
-	// }
+	}
 
 }

@@ -48,7 +48,8 @@ std::vector<double> lastStep(nLegs, 0.0);
 
 std::vector<std::string> jointName= {"left_front_leg_shoulder_rotate", "right_front_leg_shoulder_rotate", "left_back_leg_shoulder_rotate", "right_back_leg_shoulder_rotate",
 											"left_front_leg_shoulder_hinge", "right_front_leg_shoulder_hinge", "left_back_leg_shoulder_hinge", "right_back_leg_shoulder_hinge",
-											"left_front_leg_elbow_hinge", "right_front_leg_elbow_hinge", "left_back_leg_elbow_hinge", "right_back_leg_elbow_hinge"};
+											"left_front_leg_elbow_hinge", "right_front_leg_elbow_hinge", "left_back_leg_elbow_hinge", "right_back_leg_elbow_hinge",
+											"left_front_calf_elbow_hinge", "right_front_calf_elbow_hinge", "left_back_calf_elbow_hinge", "right_back_calf_elbow_hinge"};
 
 
 
@@ -203,7 +204,7 @@ std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vect
 	std::vector<std::vector<float>> point(nLegs);
 	//2.1 segundos uma passada completa
 	// std::vector<float> legTiming = {4*.167, 0, 2*.167, 6*.167};
-	std::vector<float> legTiming = { 2*PI/15, 0, PI/5, PI/15};
+	std::vector<float> legTiming = { PI/5, 0, PI/15, 2*PI/15};
 
 	float x;
 	float y;
@@ -250,9 +251,9 @@ std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vect
 					z = .2;
 
 					// if( i == 1 || i == 2)
-						x += .0009;
+				// x += .2;
 					// else
-						// x -= .02;
+					// 	x -= .2;
 					// else
 				 // 		x -= .1;
 
@@ -668,7 +669,8 @@ std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointSt
 	// initial leg angle
 	std::vector<float> theta1 = calculateTheta("shoulder_hinge", jointState_);
 	std::vector<float> theta2 = calculateTheta("shoulder_rotate", jointState_);
-	std::vector<float> theta3 = calculateTheta("elbow_hinge", jointState_);
+	std::vector<float> theta3 = calculateTheta("leg_elbow_hinge", jointState_);
+	std::vector<float> theta4 = calculateTheta("calf_elbow_hinge", jointState_);
 
 	
 	//calculation initiates------------------------------

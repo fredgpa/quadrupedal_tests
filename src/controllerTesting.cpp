@@ -998,18 +998,6 @@ sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, r
 				jointState_ = insertTheta(Theta[i], jointState_, "left_back");
 		}
 
-		// for(int i = 0; i < nJoints; i++){
-		// 	std_msgs::Float64 msg;
-		// 	msg.data = jointState_.position[i];
-		// 	//msg.data = -.9;
-		// 	jointPub[i].publish(msg);
-		// }
-
-		// //controls the subscriber, asks for new messages to be received
-		// ros::spinOnce();
-		// //sleeps the necessary time to respect the specified rate value
-		// r.sleep();
-
 	}
 
 	// std::cout << "Theta Leg 1: " << std::endl;
@@ -1226,7 +1214,7 @@ int main(int argc, char** argv){
 
 	while(ros::ok()){
 
-		//starts the walking sequence after 5 seconds of loop
+		// starts the walking sequence after 5 seconds of loop
 		if(ros::Time::now().toSec() - startingLoop.toSec() >= 5){
 			// std::cout << ros::Time::now().toSec() - startingLoop.toSec() << std::endl;
 
@@ -1257,7 +1245,6 @@ int main(int argc, char** argv){
 				jointPub[i].publish(msg);
 			}
 		}
-
 
 		//controls the subscriber, asks for new messages to be received
 		ros::spinOnce();

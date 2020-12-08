@@ -1,0 +1,674 @@
+<?xml version="1.4"?>
+<robot name="quadrupedal_robot">
+
+	<material name="blue">
+		<color rgba="0 0 .8 1" />
+	</material>
+
+	<material name="red">
+		<color rgba=".8 0 0 1" />
+	</material>
+
+	<material name="white">
+		<color rgba="1 1 1 1" />
+	</material>
+
+	<link name="dummy" />
+
+	<link name="base_link">
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>				
+				<box size="1 0.4 .2" />
+			</geometry>
+			<material name="white" />
+		</visual>
+
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>				
+				<box size="1 0.4 .2" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value="15" />
+
+			<inertia ixx="20.3125" ixy="0" ixz="0" iyy="22.8125" iyz="0" izz="3.125" />
+		</inertial>
+	</link>
+
+	<link name="left_front_shoulder" >
+		<visual>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
+			</geometry>
+			<material name="blue" />
+		</visual>
+
+		<collision>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value=".5" />
+
+			<inertia ixx=".001354" ixy="0" ixz="0" iyy=".0025" iyz="0" izz=".001354" />
+		</inertial>
+	</link>
+
+	<link name="right_front_shoulder">
+		<visual>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
+			</geometry>
+			<material name="blue" />
+		</visual>
+
+		<collision>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
+			</geometry>
+			<material name="blue" />
+		</collision>
+
+		<inertial>
+			<mass value=".5" />
+
+			<inertia ixx=".001354" ixy="0" ixz="0" iyy=".0025" iyz="0" izz=".001354" />
+		</inertial>
+	</link>
+
+	<link name="left_back_shoulder">
+		<visual>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
+			</geometry>
+			<material name="blue" />
+		</visual>
+
+		<collision>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value=".5" />
+
+			<inertia ixx=".001354" ixy="0" ixz="0" iyy=".0025" iyz="0" izz=".001354" />
+		</inertial>
+	</link>
+
+	<link name="right_back_shoulder">
+		<visual>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
+			</geometry>
+			<material name="blue" />
+		</visual>
+
+		<collision>
+			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length=".1" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value=".5" />
+
+			<inertia ixx=".001354" ixy="0" ixz="0" iyy=".0025" iyz="0" izz=".001354" />
+		</inertial>
+	</link>
+
+	<link name="left_front_leg" >
+		<visual>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
+			</geometry>
+			<material name="red" />
+		</visual>
+
+		<collision>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value="3" />
+
+			<inertia ixx="4" ixy="0" ixz="0" iyy="4" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
+	<link name="right_front_leg" >
+		<visual>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
+			</geometry>
+			<material name="red" />
+		</visual>
+
+		<collision>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value="3" />
+
+			<inertia ixx="4" ixy="0" ixz="0" iyy="4" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
+	<link name="left_back_leg" >
+		<visual>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
+			</geometry>
+			<material name="red" />
+		</visual>
+
+		<collision>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value="3" />
+
+			<inertia ixx="4" ixy="0" ixz="0" iyy="4" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
+	<link name="right_back_leg" >
+		<visual>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
+			</geometry>
+			<material name="red" />
+		</visual>
+
+		<collision>
+			<origin xyz="0.2 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.4" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value="3" />
+
+			<inertia ixx="4" ixy="0" ixz="0" iyy="4" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
+	<link name="left_front_calf" >
+		<visual>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
+			</geometry>
+			<material name="red" />
+		</visual>
+
+		<collision>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value="3" />
+
+			<inertia ixx="4" ixy="0" ixz="0" iyy="4" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
+	<link name="right_front_calf" >
+		<visual>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
+			</geometry>
+			<material name="red" />
+		</visual>
+
+		<collision>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value="3" />
+
+			<inertia ixx="4" ixy="0" ixz="0" iyy="4" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
+	<link name="left_back_calf" >
+		<visual>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
+			</geometry>
+			<material name="red" />
+		</visual>
+
+		<collision>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value="3" />
+
+			<inertia ixx="4" ixy="0" ixz="0" iyy="4" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
+	<link name="right_back_calf" >
+		<visual>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
+			</geometry>
+			<material name="red" />
+		</visual>
+
+		<collision>
+			<origin xyz="0.175 0 0" rpy="0 1.57 0"/>
+			<geometry>				
+				<cylinder radius=".05" length="0.35" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value="3" />
+
+			<inertia ixx="4" ixy="0" ixz="0" iyy="4" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
+	<link name="left_front_foot" >
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>				
+				<sphere radius=".05" />
+			</geometry>
+			<material name="white" />
+		</visual>
+
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<sphere radius=".05" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value=".75" />
+
+			<inertia ixx=".003" ixy="0" ixz="0" iyy=".003" iyz="0" izz=".003" />
+		</inertial>
+	</link>
+
+	<link name="right_front_foot" >
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>				
+				<sphere radius=".05" />
+			</geometry>
+			<material name="white" />
+		</visual>
+
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<sphere radius=".05" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value=".75" />
+
+			<inertia ixx=".003" ixy="0" ixz="0" iyy=".003" iyz="0" izz=".003" />
+		</inertial>
+	</link>
+
+	<link name="left_back_foot" >
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>				
+				<sphere radius=".05" />
+			</geometry>
+			<material name="white" />
+		</visual>
+
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<sphere radius=".05" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value=".75" />
+
+			<inertia ixx=".003" ixy="0" ixz="0" iyy=".003" iyz="0" izz=".003" />
+		</inertial>
+	</link>
+
+	<link name="right_back_foot" >
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>				
+				<sphere radius=".05" />
+			</geometry>
+			<material name="white" />
+		</visual>
+
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<sphere radius=".05" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<mass value=".75" />
+
+			<inertia ixx=".003" ixy="0" ixz="0" iyy=".003" iyz="0" izz=".003" />
+		</inertial>
+	</link>
+
+	<joint name="dummy_joint" type="fixed">
+		<parent link="dummy" />
+		<child link="base_link" />
+	</joint>
+
+	<joint name="left_front_leg_shoulder_hinge" type="revolute">
+		<origin xyz="0.5 .2 0" rpy="1.57 0 -1.57"/>
+		<parent link="base_link" />
+		<child link="left_front_shoulder" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="right_front_leg_shoulder_hinge" type="revolute">
+		<origin xyz="0.5 -.2 0" rpy="1.57 0 1.57"/>
+		<parent link="base_link" />
+		<child link="right_front_shoulder" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="left_back_leg_shoulder_hinge" type="revolute">
+		<origin xyz="-0.5 .2 0" rpy="1.57 0 -1.57"/>
+		<parent link="base_link" />
+		<child link="left_back_shoulder" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="right_back_leg_shoulder_hinge" type="revolute">
+		<origin xyz="-0.5 -.2 0" rpy="1.57 0 1.57"/>
+		<parent link="base_link" />
+		<child link="right_back_shoulder" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="left_front_leg_shoulder_rotate" type="revolute">
+		<origin xyz="-.1 0 0" rpy="1.57 0 -1.57"/>
+		<parent link="left_front_shoulder" />
+		<child link="left_front_leg" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="right_front_leg_shoulder_rotate" type="revolute">
+		<origin xyz="-.1 0 0" rpy="1.57 0 -1.57"/>
+		<parent link="right_front_shoulder" />
+		<child link="right_front_leg" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="left_back_leg_shoulder_rotate" type="revolute">
+		<origin xyz="-.1 0 0" rpy="1.57 0 -1.57"/>
+		<parent link="left_back_shoulder" />
+		<child link="left_back_leg" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="right_back_leg_shoulder_rotate" type="revolute">
+		<origin xyz="-.1 0 0" rpy="1.57 0 -1.57"/>
+		<parent link="right_back_shoulder" />
+		<child link="right_back_leg" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="left_front_leg_elbow_hinge" type="revolute">
+		<origin xyz="0.4 0 0" rpy="0 0 0" />
+		<parent link="left_front_leg" />
+		<child link="left_front_calf" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="right_front_leg_elbow_hinge" type="revolute">
+		<origin xyz="0.4 0 0" rpy="0 0 0" />
+		<parent link="right_front_leg" />
+		<child link="right_front_calf" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="left_back_leg_elbow_hinge" type="revolute">
+		<origin xyz="0.4 0 0" rpy="0 0 0" />
+		<parent link="left_back_leg" />
+		<child link="left_back_calf" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="right_back_leg_elbow_hinge" type="revolute">
+		<origin xyz="0.4 0 0" rpy="0 0 0" />
+		<parent link="right_back_leg" />
+		<child link="right_back_calf" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+	</joint>
+
+	<joint name="left_front_foot_hinge" type="fixed">
+		<origin xyz="0.35 0 0" rpy="0 0 0" />
+		<parent link="left_front_calf" />
+		<child link="left_front_foot" />
+	</joint>
+
+	<joint name="right_front_foot_hinge" type="fixed">
+		<origin xyz="0.35 0 0" rpy="0 0 0" />
+		<parent link="right_front_calf" />
+		<child link="right_front_foot" />
+	</joint>
+
+	<joint name="left_back_foot_hinge" type="fixed">
+		<origin xyz="0.35 0 0" rpy="0 0 0" />
+		<parent link="left_back_calf" />
+		<child link="left_back_foot" />
+	</joint>
+
+	<joint name="right_back_foot_hinge" type="fixed">
+		<origin xyz="0.35 0 0" rpy="0 0 0" />
+		<parent link="right_back_calf" />
+		<child link="right_back_foot" />
+	</joint>
+
+	<transmission name="left_front_leg_shoulder_rotate_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_front_leg_shoulder_rotate">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_front_leg_shoulder_rotate_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_front_leg_shoulder_rotate_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_front_leg_shoulder_rotate">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_front_leg_shoulder_rotate_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_back_leg_shoulder_rotate_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_back_leg_shoulder_rotate">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_back_leg_shoulder_rotate_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_back_leg_shoulder_rotate_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_back_leg_shoulder_rotate">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_back_leg_shoulder_rotate_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_front_leg_shoulder_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_front_leg_shoulder_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_front_leg_shoulder_hinge_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_front_leg_shoulder_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_front_leg_shoulder_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_front_leg_shoulder_hinge_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_back_leg_shoulder_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_back_leg_shoulder_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_back_leg_shoulder_hinge_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_back_leg_shoulder_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_back_leg_shoulder_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_back_leg_shoulder_hinge_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_front_leg_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_front_leg_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_front_leg_elbow_hinge_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_front_leg_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_front_leg_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_front_leg_elbow_hinge_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="left_back_leg_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="left_back_leg_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="left_back_leg_elbow_hinge_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="right_back_leg_elbow_hinge_transmission">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="right_back_leg_elbow_hinge">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="right_back_leg_elbow_hinge_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<gazebo>
+		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+			<!-- <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> -->
+			<robotNamespace>/quadrupedal_test</robotNamespace>
+		</plugin>
+	</gazebo>
+
+</robot>

@@ -201,9 +201,7 @@ sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, bool aux){
 std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vector<float>> currentPoint){
 //returns the foot position in function of time variable
 	std::vector<std::vector<float>> point(nLegs);
-	//2.1 segundos uma passada completa
-	// std::vector<float> legTiming = {4*.167, 0, 2*.167, 6*.167};
-	std::vector<float> legTiming = { 2*PI/15, 0, PI/5, PI/15};
+	std::vector<float> legTiming = { 2*PI/15, 0, PI/5, PI/15 };
 
 	float x;
 	float y;
@@ -213,10 +211,7 @@ std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vect
 
 	std::vector<float> instantLegs = {instant-legTiming[0], instant-legTiming[1], instant-legTiming[2], instant-legTiming[3]};
 
-	// std::cout << instantLegs[1] << std::endl;
-
 	for(int i = 0; i < nLegs; i++){
-		// std::cout << instant << std::endl;
 
 		x = currentPoint[i][0];//calculate z
 		y = currentPoint[i][1];
@@ -228,8 +223,9 @@ std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vect
 				
 				z = sin((instantLegs[i])*10)*.6;
 					
-				if((instantLegs[i]) >= PI/8)
+				if((instantLegs[i]) >= PI/10)
 					lastStep[i] = (instantLegs[i]);
+
 			}else if((instantLegs[i]) >= lastStep[i] + PI/6){
 
 				z = (sin(instantLegs[i] - lastStep[i] - PI/6)*10)*.6;
@@ -240,22 +236,13 @@ std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vect
 			}else
 				z = 0;
 
-			// std::cout << z << std::endl;
-			// std::cout << "-------------------------------" << std::endl;
-
 			if(z <= 0)
 				z = 0;
 			else{
-				if(z > .2)
-					z = .2;
+				if(z > .6)
+					z = .6;
 
-					// if( i == 1 || i == 2)
-						x += .0009;
-					// else
-						// x -= .02;
-					// else
-				 // 		x -= .1;
-
+				x += .0009;
 			}
 		}
 
@@ -1172,7 +1159,7 @@ int main(int argc, char** argv){
 	//create the subscriber and subscribes to the joint_states topic
 	ros::Subscriber sub = n.subscribe("/quadrupedal_test/joint_states", 1, jointCallback);
 	
-	//set a rate to control the loop	
+	//set a rate to control the loop
 	ros::Rate r(RATE);
 	
 	//get the robot name from ROSPARAM | not needed right now
@@ -1210,15 +1197,11 @@ int main(int argc, char** argv){
 	//timing variables
 	ros::Time startingLoop = ros::Time::now();
 
-
-
 	while(ros::ok()){
 
 		// starts the walking sequence after 5 seconds of loop
 		if(ros::Time::now().toSec() - startingLoop.toSec() >= 5){
 			// std::cout << ros::Time::now().toSec() - startingLoop.toSec() << std::endl;
-
-			legFrequencyStart.publish(legMsg);
 
 			currentPoint = forwardCinematic(testeState);
 

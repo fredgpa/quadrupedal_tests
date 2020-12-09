@@ -45,15 +45,12 @@ include_directories(
 
 add_executable(set_transforms src/set_transforms.cpp)
 add_executable(test_node src/test_node.cpp)
-add_executable(RobotLeg src/RobotLeg.cpp)
 add_executable(controllerTesting src/controllerTesting.cpp)
 add_executable(legsFrequency src/legsFrequency.cpp)
 add_executable(quadrupedal_control_rviz src/quadrupedal_control_rviz.cpp)
-add_executable(PIDoptimization src/PIDoptimization.cpp)
+
 target_link_libraries(set_transforms ${catkin_LIBRARIES})
 target_link_libraries(test_node ${catkin_LIBRARIES})
-target_link_libraries(RobotLeg ${catkin_LIBRARIES})
 target_link_libraries(controllerTesting ${catkin_LIBRARIES} ${OpenCV_LIBS} ${ARMADILLO_LIBRARIES})
 target_link_libraries(legsFrequency ${catkin_LIBRARIES})
 target_link_libraries(quadrupedal_control_rviz ${catkin_LIBRARIES} ${OpenCV_LIBS} ${ARMADILLO_LIBRARIES})
-target_link_libraries(PIDoptimization ${catkin_LIBRARIES} ${ARMADILLO_LIBRARIES})

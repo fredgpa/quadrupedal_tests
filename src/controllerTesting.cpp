@@ -115,146 +115,6 @@ void printJointState(sensor_msgs::JointState jointState_){
 	}
 }
 
-// -------------------------- Movement Templates ------------------------------\\
-
-sensor_msgs::JointState crouch(std::vector<std::string> jointName){
-//radians for each joint to get the robot on a crouching stance
-	sensor_msgs::JointState jointState_;
-
-	jointState_.name.resize(nJoints);
-	jointState_.position.resize(nJoints);
-
-	jointState_.name = jointName;
-
-	for(int i = 0; i < nJoints; i++){
-		if(jointState_.name[i].find("_shoulder_hinge") != std::string::npos){
-
-			jointState_.position[i] = 0;
-
-		}else if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
-			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("left_front") != std::string::npos)
-				jointState_.position[i] = -.28;
-			else
-				jointState_.position[i] = .28;			
-		}else if(jointState_.name[i].find("_leg_elbow") != std::string::npos){
-			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("left_front") != std::string::npos)
-				jointState_.position[i] = .6;
-			else
-				jointState_.position[i] = -.6;
-		}
-	}
-
-	return jointState_;
-}
-
-sensor_msgs::JointState standUp(std::vector<std::string> jointName_){
-//radians for each joint to get the robot on a stood up stance
-	sensor_msgs::JointState jointState_;
-
-	jointState_.name.resize(nJoints);
-	jointState_.position.resize(nJoints);
-
-	jointState_.name = jointName_;
-
-	for(int i = 0; i < nJoints; i++){
-		jointState_.position[i] = 0;
-	}
-
-	return jointState_;
-}
-
-sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, bool aux){
-//radians for each joint to get the robot to lift some of the legs
-
-	for(int i = 0; i < nJoints; i++){
-		if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
-			if(aux){
-				if(jointState_.name[i].find("right_back") != std::string::npos)
-					jointState_.position[i] = .9;
-				else if(jointState_.name[i].find("left_back") != std::string::npos)
-					jointState_.position[i] = -.28;
-			}else{
-				if(jointState_.name[i].find("right_back") != std::string::npos)
-					jointState_.position[i] = .28;
-				else if(jointState_.name[i].find("left_back") != std::string::npos)
-					jointState_.position[i] = -.9;
-			}
-		}else if(jointState_.name[i].find("_leg_elbow") != std::string::npos){
-			if(aux){
-				if(jointState_.name[i].find("right_back") != std::string::npos)
-					jointState_.position[i] = -1.57;
-				else if(jointState_.name[i].find("left_back") != std::string::npos)
-					jointState_.position[i] = .6;
-			}else{
-				if(jointState_.name[i].find("right_back") != std::string::npos)
-					jointState_.position[i] = -.6;
-				else if(jointState_.name[i].find("left_back") != std::string::npos)
-					jointState_.position[i] = 1.57;
-			}
-		}
-	}
-
-	return jointState_;
-}
-
-
-std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vector<float>> currentPoint){
-//returns the foot position in function of time variable
-	std::vector<std::vector<float>> point(nLegs);
-	std::vector<float> legTiming = { 2*PI/15, 0, PI/5, PI/15 };
-
-	float x;
-	float y;
-	float z;
-
-	std::vector<bool> legFirst = {true, true, true, true};
-
-	std::vector<float> instantLegs = {instant-legTiming[0], instant-legTiming[1], instant-legTiming[2], instant-legTiming[3]};
-
-	for(int i = 0; i < nLegs; i++){
-
-		x = currentPoint[i][0];//calculate z
-		y = currentPoint[i][1];
-		z = currentPoint[i][2];
-
-		if(instant >= legTiming[i]){
-
-			if(lastStep[i] == 0){
-				
-				z = sin((instantLegs[i])*10)*.6;
-					
-				if((instantLegs[i]) >= PI/10)
-					lastStep[i] = (instantLegs[i]);
-
-			}else if((instantLegs[i]) >= lastStep[i] + PI/6){
-
-				z = (sin(instantLegs[i] - lastStep[i] - PI/6)*10)*.6;
-
-				if((instantLegs[i]) >= lastStep[i] + PI/5)
-					lastStep[i] = (instantLegs[i]);
-
-			}else
-				z = 0;
-
-			if(z <= 0)
-				z = 0;
-			else{
-				if(z > .6)
-					z = .6;
-
-				x += .0009;
-			}
-		}
-
-
-		point[i] = {x, y, z};
-	}
-
-	return point;
-
-}
-
-
 //=========================== Mathematical functions ==========================\\
 
 
@@ -296,6 +156,42 @@ std::vector<std::vector<float>> Trans(float a, float b, float c, float d){
 	T[3] = {0, 0, 0, 1};
 
 	return T;
+}
+
+float differenceFootShoulder(sensor_msgs::JointState jointState_, int i){
+	float shoulderTheta, elbowTheta;
+	for(int j = 0; j < nJoints; j++){
+		if(i == 0 && jointState_.name[j].find("right_back") != std::string::npos){
+				if(jointState_.name[j].find("shoulder_rotate") != std::string::npos){
+					shoulderTheta = jointState_.position[j];
+				}else if(jointState_.name[j].find("elbow_hinge") != std::string::npos){
+					elbowTheta = jointState_.position[j];
+				}
+		}else if(i == 1 && jointState_.name[j].find("right_front") != std::string::npos){
+			if(jointState_.name[j].find("shoulder_rotate") != std::string::npos){
+				shoulderTheta = jointState_.position[j];
+			}else if(jointState_.name[j].find("elbow_hinge") != std::string::npos){
+				elbowTheta = jointState_.position[j];
+			}
+		}else if(i == 2 && jointState_.name[j].find("left_front") != std::string::npos){
+			if(jointState_.name[j].find("shoulder_rotate") != std::string::npos){
+				shoulderTheta = jointState_.position[j];
+			}else if(jointState_.name[j].find("elbow_hinge") != std::string::npos){
+				elbowTheta = jointState_.position[j];
+			}
+		}else if(jointState_.name[j].find("left_back") != std::string::npos){
+			if(jointState_.name[j].find("shoulder_rotate") != std::string::npos){
+				shoulderTheta = jointState_.position[j];
+			}else if(jointState_.name[j].find("elbow_hinge") != std::string::npos){
+				elbowTheta = jointState_.position[j];
+			}
+		}
+	}
+
+	float xShoulder = legLength * sin(shoulderTheta);
+	float xElbow = calfLength * sin(elbowTheta);
+
+	return abs(xShoulder-xElbow);
 }
 
 //--------------------------- Theta handling ----------------------------------\\
@@ -1122,7 +1018,151 @@ std::vector<float> forwardCinematicQ(sensor_msgs::JointState jointState_){
 	return Ppata[0];
 }
 
+// -------------------------- Movement Templates ------------------------------\\
 
+sensor_msgs::JointState crouch(std::vector<std::string> jointName){
+//radians for each joint to get the robot on a crouching stance
+	sensor_msgs::JointState jointState_;
+
+	jointState_.name.resize(nJoints);
+	jointState_.position.resize(nJoints);
+
+	jointState_.name = jointName;
+
+	for(int i = 0; i < nJoints; i++){
+		if(jointState_.name[i].find("_shoulder_hinge") != std::string::npos){
+
+			jointState_.position[i] = 0;
+
+		}else if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
+			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("left_front") != std::string::npos)
+				jointState_.position[i] = -.28;
+			else
+				jointState_.position[i] = .28;			
+		}else if(jointState_.name[i].find("_leg_elbow") != std::string::npos){
+			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("left_front") != std::string::npos)
+				jointState_.position[i] = .6;
+			else
+				jointState_.position[i] = -.6;
+		}
+	}
+
+	return jointState_;
+}
+
+sensor_msgs::JointState standUp(std::vector<std::string> jointName_){
+//radians for each joint to get the robot on a stood up stance
+	sensor_msgs::JointState jointState_;
+
+	jointState_.name.resize(nJoints);
+	jointState_.position.resize(nJoints);
+
+	jointState_.name = jointName_;
+
+	for(int i = 0; i < nJoints; i++){
+		jointState_.position[i] = 0;
+	}
+
+	return jointState_;
+}
+
+sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, bool aux){
+//radians for each joint to get the robot to lift some of the legs
+
+	for(int i = 0; i < nJoints; i++){
+		if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
+			if(aux){
+				if(jointState_.name[i].find("right_back") != std::string::npos)
+					jointState_.position[i] = .9;
+				else if(jointState_.name[i].find("left_back") != std::string::npos)
+					jointState_.position[i] = -.28;
+			}else{
+				if(jointState_.name[i].find("right_back") != std::string::npos)
+					jointState_.position[i] = .28;
+				else if(jointState_.name[i].find("left_back") != std::string::npos)
+					jointState_.position[i] = -.9;
+			}
+		}else if(jointState_.name[i].find("_leg_elbow") != std::string::npos){
+			if(aux){
+				if(jointState_.name[i].find("right_back") != std::string::npos)
+					jointState_.position[i] = -1.57;
+				else if(jointState_.name[i].find("left_back") != std::string::npos)
+					jointState_.position[i] = .6;
+			}else{
+				if(jointState_.name[i].find("right_back") != std::string::npos)
+					jointState_.position[i] = -.6;
+				else if(jointState_.name[i].find("left_back") != std::string::npos)
+					jointState_.position[i] = 1.57;
+			}
+		}
+	}
+
+	return jointState_;
+}
+
+
+std::vector<std::vector<float>> sinWalking(float instant, std::vector<std::vector<float>> currentPoint){
+//returns the foot position in function of time variable
+	std::vector<std::vector<float>> point(nLegs);
+	std::vector<float> legTiming = { 2*PI/15, 0, PI/5, PI/15 };
+
+	float x;
+	float y;
+	float z;
+
+	std::vector<bool> legFirst = {true, true, true, true};
+
+	std::vector<float> instantLegs = {instant-legTiming[0], instant-legTiming[1], instant-legTiming[2], instant-legTiming[3]};
+
+	for(int i = 0; i < nLegs; i++){
+
+		x = currentPoint[i][0];//calculate z
+		y = currentPoint[i][1];
+		z = currentPoint[i][2];
+
+		if(instant >= legTiming[i]){
+
+			if(lastStep[i] == 0){
+				
+				// z = sin((instantLegs[i])*10)*.8;
+					
+				if((instantLegs[i]) >= PI/10)
+					lastStep[i] = (instantLegs[i]);
+
+			}else if((instantLegs[i]) >= lastStep[i] + PI/6){
+
+				z = (sin(instantLegs[i] - lastStep[i] - PI/6)*10)*.8;
+
+				if((instantLegs[i]) >= lastStep[i] + PI/5)
+					lastStep[i] = (instantLegs[i]);
+
+			}else
+				z = 0;
+
+			if(z <= 0)
+				z = 0;
+			else{
+				if(z > .8)
+					z = .8;
+
+				// float diff = differenceFootShoulder(jointState, i);
+				// std::cout << diff << std::endl;
+				// if(diff > 0)
+				// 	x += diff/10;
+				if(i == 1 || i == 2)
+					x += .0009;
+				else
+					x += .0014;
+			}
+		}
+
+
+		point[i] = {x, y, z};
+	}
+
+	return point;
+
+}
 
 
 int main(int argc, char** argv){
@@ -1205,7 +1245,7 @@ int main(int argc, char** argv){
 
 			currentPoint = forwardCinematic(testeState);
 
-			objPoint = sinWalking(ros::Time::now().toSec() - startingLoop.toSec() - 5, currentPoint);
+			objPoint = sinWalking(((float) ros::Time::now().toSec()) - ((float) startingLoop.toSec()) - 5, currentPoint);
 
 			// std::cout << objPoint[1][0] << std::endl;
 			// std::cout << objPoint[1][1] << std::endl;

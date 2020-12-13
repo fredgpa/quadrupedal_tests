@@ -3,7 +3,7 @@ simpleArm:
 
   joint_state_controller:
     type: "joint_state_controller/JointStateController"
-    publish_rate: 2500
+    publish_rate: 1000
 
   #position controllers
   left_front_leg_shoulder_rotate_controller:

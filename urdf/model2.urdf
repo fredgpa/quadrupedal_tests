@@ -407,9 +407,23 @@
 		</inertial>
 	</link>
 
+	<link name="imu_link">
+
+		<inertial>
+			<mass value="0" />
+
+			<inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
 	<joint name="dummy_joint" type="fixed">
 		<parent link="dummy" />
 		<child link="base_link" />
+	</joint>
+
+	<joint name="imu_dummy" type="fixed">
+		<parent link="base_link" />
+		<child link="imu_link" />
 	</joint>
 
 	<joint name="left_front_leg_shoulder_hinge" type="revolute">
@@ -669,6 +683,18 @@
 			<!-- <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> -->
 			<robotNamespace>/quadrupedal_test</robotNamespace>
 		</plugin>
+		
+		<plugin name="gazebo_ros_imu" filename="libgazebo_ros_imu.so">
+			<alwaysOn>true</alwaysOn>
+			<bodyName>imu_link</bodyName>
+			<topicName>imu_data</topicName>
+			<serviceName>imu_service</serviceName>
+			<gaussianNoise>0.0</gaussianNoise>
+			<xyzOffsets>0 0 0</xyzOffsets>
+			<rpyOffsets>0 0 0</rpyOffsets>
+			<updateRate>100.0</updateRate>
+		</plugin>
+
 	</gazebo>
 
 </robot>

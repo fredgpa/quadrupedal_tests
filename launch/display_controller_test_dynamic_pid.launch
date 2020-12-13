@@ -42,6 +42,6 @@
                 <param name="publish_frequency" type="double" value="30.0" />
         </node>
 
-        <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find quadrupedal_tests)/rviz/urdf.rviz" required="true" ns="/quadrupedal_test" />-->
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find quadrupedal_tests)/rviz/urdf.rviz" required="true" ns="/quadrupedal_test" />
         
 </launch>

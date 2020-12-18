@@ -38,6 +38,28 @@
 		</inertial>
 	</link>
 
+	<link name="box_link">
+        <visual>
+            <origin xyz="0 0 .225" rpy="0 0 0" />
+            <geometry>
+                <box size=".25 .25 .25" />
+            </geometry>
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 .225" rpy="0 0 0" />
+            <geometry>
+                <box size=".25 .25 .25" />
+            </geometry>
+        </collision>
+        
+        <inertial>
+            <mass value=".5" />
+
+            <inertia ixx="0.020833333" ixy="0" ixz="0" iyy="0.020833333" iyz="0" izz="0.020833333" />
+        </inertial>
+    </link>
+
 	<link name="left_front_shoulder" >
 		<visual>
 			<origin xyz="-.05 0 0" rpy="0 1.57 0"/>
@@ -329,6 +351,14 @@
 			<geometry>
 				<sphere radius=".05" />
 			</geometry>
+			<surface>
+				<friction>
+					<ode>
+						<mu>50000</mu>
+						<mu2>50000</mu2>
+					</ode>
+				</friction>
+			</surface>
 		</collision>
 
 		<inertial>
@@ -407,7 +437,16 @@
 		</inertial>
 	</link>
 
-	<link name="imu_link">
+	<link name="imu_robot_link">
+
+		<inertial>
+			<mass value="0" />
+
+			<inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+		</inertial>
+	</link>
+
+	<link name="imu_cargo_link">
 
 		<inertial>
 			<mass value="0" />
@@ -421,9 +460,23 @@
 		<child link="base_link" />
 	</joint>
 
-	<joint name="imu_dummy" type="fixed">
+	<joint name="imu_robot_dummy" type="fixed">
 		<parent link="base_link" />
-		<child link="imu_link" />
+		<child link="imu_robot_link" />
+	</joint>
+
+	<joint name="imu_cargo_dummy" type="fixed">
+		<parent link="box_link" />
+		<child link="imu_cargo_link" />
+	</joint>
+
+	<joint name="spring" type="prismatic">
+		<origin xyz="0 0 .1" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="box_link" />
+		<axis xyz="0 0 1" />
+
+		<limit lower="-.1" upper=".1" effort = "1000" velocity="1000"/>	
 	</joint>
 
 	<joint name="left_front_leg_shoulder_hinge" type="revolute">
@@ -432,7 +485,7 @@
 		<child link="left_front_shoulder" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="right_front_leg_shoulder_hinge" type="revolute">
@@ -441,7 +494,7 @@
 		<child link="right_front_shoulder" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="left_back_leg_shoulder_hinge" type="revolute">
@@ -450,7 +503,7 @@
 		<child link="left_back_shoulder" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="right_back_leg_shoulder_hinge" type="revolute">
@@ -459,7 +512,7 @@
 		<child link="right_back_shoulder" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="left_front_leg_shoulder_rotate" type="revolute">
@@ -468,7 +521,7 @@
 		<child link="left_front_leg" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="right_front_leg_shoulder_rotate" type="revolute">
@@ -477,7 +530,7 @@
 		<child link="right_front_leg" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="left_back_leg_shoulder_rotate" type="revolute">
@@ -486,7 +539,7 @@
 		<child link="left_back_leg" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="right_back_leg_shoulder_rotate" type="revolute">
@@ -495,7 +548,7 @@
 		<child link="right_back_leg" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="left_front_leg_elbow_hinge" type="revolute">
@@ -504,7 +557,7 @@
 		<child link="left_front_calf" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="right_front_leg_elbow_hinge" type="revolute">
@@ -513,7 +566,7 @@
 		<child link="right_front_calf" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="left_back_leg_elbow_hinge" type="revolute">
@@ -522,7 +575,7 @@
 		<child link="left_back_calf" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="right_back_leg_elbow_hinge" type="revolute">
@@ -531,7 +584,7 @@
 		<child link="right_back_calf" />
 		<axis xyz="0 0 1" />
 
-		<limit lower="-1.57" upper="1.57" effort="100" velocity="1" />
+		<limit lower="-1.57" upper="1.57" effort="100" velocity="100" />
 	</joint>
 
 	<joint name="left_front_foot_hinge" type="fixed">
@@ -678,6 +731,16 @@
 		</actuator>
 	</transmission>
 
+	<transmission name="cargo_spring">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="spring">
+			<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="spring_motor">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
 	<gazebo>
 		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
 			<!-- <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> -->
@@ -686,15 +749,39 @@
 		
 		<plugin name="gazebo_ros_imu" filename="libgazebo_ros_imu.so">
 			<alwaysOn>true</alwaysOn>
-			<bodyName>imu_link</bodyName>
-			<topicName>imu_data</topicName>
-			<serviceName>imu_service</serviceName>
+			<bodyName>imu_robot_link</bodyName>
+			<topicName>imu_data_robot</topicName>
+			<serviceName>imu_service_robot</serviceName>
 			<gaussianNoise>0.0</gaussianNoise>
 			<xyzOffsets>0 0 0</xyzOffsets>
 			<rpyOffsets>0 0 0</rpyOffsets>
-			<updateRate>100.0</updateRate>
+			<updateRate>1000.0</updateRate>
 		</plugin>
 
+		<plugin name="p3d_controller" filename="libgazebo_ros_p3d.so">
+			<alwaysOn>true</alwaysOn>
+			<updateRate>1000</updateRate>
+			<bodyName>base_link</bodyName>
+			<topicName>p3d_robot</topicName>
+		</plugin>
+
+		<plugin name="gazebo_ros_imu" filename="libgazebo_ros_imu.so">
+            <alwaysOn>true</alwaysOn>
+            <bodyName>imu_cargo_link</bodyName>
+            <topicName>imu_data_cargo</topicName>
+            <serviceName>imu_service_cargo</serviceName>
+            <gaussianNoise>0.0</gaussianNoise>
+            <xyzOffsets>0 0 0</xyzOffsets>
+            <rpyOffsets>0 0 0</rpyOffsets>
+            <updateRate>1000.0</updateRate>
+        </plugin>
+
+        <plugin name="p3d_controller" filename="libgazebo_ros_p3d.so">
+			<alwaysOn>true</alwaysOn>
+			<updateRate>1000</updateRate>
+			<bodyName>box_link</bodyName>
+			<topicName>p3d_cargo</topicName>
+		</plugin>
 	</gazebo>
 
 </robot>

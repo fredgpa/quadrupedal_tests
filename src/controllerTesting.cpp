@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-#include <std_msgs/Float64.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -10,7 +9,11 @@
 
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
+#include "sensor_msgs/Imu.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Float64.h"
+#include "nav_msgs/Odometry.h"
+
 
 //=========================== VARIABLES =======================================\\
 
@@ -19,6 +22,7 @@
 #define PI 3.14159
 #define RATE 1000
 #define F_ROT 2*PI
+#define LAMBDA .99
 
 //--------------------------- ROBOT PARAMETERS --------------------------------\\
 // currently for model2.urdf
@@ -60,6 +64,14 @@ std::string TrfMoving;
 std::string TlfMoving;
 std::string TlbMoving;
 
+float cargoAcc_z, robotAcc_z;
+float cargoVel_z, robotVel_z;
+
+std::vector<float> cargoPose(3), robotPose(3);
+
+std::vector<std::vector<float>> P;
+std::vector<float> theta;
+
 //=============================================================================\\
 //=========================== FUNCTIONS =======================================\\
 //=============================================================================\\
@@ -78,6 +90,32 @@ void jointCallback(const sensor_msgs::JointState::ConstPtr &_js){
 		jointState.name[i] = _js->name[i];		
 		jointState.position[i] = _js->position[i];
 	}
+}
+
+void cargoIMUCallBack(const sensor_msgs::Imu::ConstPtr &_js){
+
+	cargoAcc_z = _js->linear_acceleration.z;
+}
+
+void robotIMUCallBack(const sensor_msgs::Imu::ConstPtr &_js){
+
+	robotAcc_z = _js->linear_acceleration.z;
+}
+
+void cargoP3dCallBack(const nav_msgs::Odometry::ConstPtr &_js){
+	cargoPose[0] = _js->pose.pose.position.x;
+	cargoPose[1] = _js->pose.pose.position.y;
+	cargoPose[2] = _js->pose.pose.position.z;
+
+	cargoVel_z = _js->twist.twist.linear.z;
+}
+
+void robotP3dCallBack(const nav_msgs::Odometry::ConstPtr &_js){
+	robotPose[0] = _js->pose.pose.position.x;
+	robotPose[1] = _js->pose.pose.position.y;
+	robotPose[2] = _js->pose.pose.position.z;
+
+	robotVel_z = _js->twist.twist.linear.z;
 }
 
 void legCallbackTrb(const std_msgs::String::ConstPtr& msg){
@@ -251,7 +289,7 @@ std::vector<std::vector<float>> matrixMulti(std::vector<std::vector<float>> m1, 
 	for(int i = 0; i < m1[0].size(); i++){
  		for(int j = 0; j < m2.size(); j++){
  			multi[i][j] = 0;
- 			for(int k = 0; k < nLegs; k++){
+ 			for(int k = 0; k < m1[0].size(); k++){
  				multi[i][j] += m1[i][k]*m2[k][j];
  			}
  		}
@@ -268,6 +306,20 @@ std::vector<float> matrixArrayMulti(std::vector<std::vector<float>> matrix, std:
 			multi[i] = 0;
 			for(int j = 0; j < matrix[0].size(); j++)
 				multi[i] += matrix[i][j]*array[j];
+		}
+
+
+ 	return multi;
+}
+
+std::vector<float> matrixArrayMulti(std::vector<float> array, std::vector<std::vector<float>> matrix){
+//multiply a matrix and an array
+	std::vector<float> multi(array.size());
+
+		for(int i = 0; i < array.size(); i++){
+			multi[i] = 0;
+			for(int j = 0; j < matrix.size(); j++)
+				multi[i] += matrix[j][i]*array[j];
 		}
 
 
@@ -425,6 +477,15 @@ std::vector<float> vectorSumSub(std::vector<float> v1, std::vector<float> v2, bo
 	return vector;
 }
 
+std::vector<std::vector<float>> vectorMulti(std::vector<float> a, std::vector<float> b){
+	std::vector<std::vector<float>> multi(a.size(), std::vector<float>(b.size()));
+
+	for(int i = 0; i < a.size(); i++)
+		for(int j = 0; j < b.size(); j++)
+			multi[i][j] = a[i] * b[j];
+
+	return multi;
+}
 
 float sum(std::vector<float> array){
 //sums all the values of a vector
@@ -1066,40 +1127,44 @@ sensor_msgs::JointState standUp(std::vector<std::string> jointName_){
 	return jointState_;
 }
 
-sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, bool aux){
+sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, float f, bool state){
 //radians for each joint to get the robot to lift some of the legs
 
+	float d = f/RATE;
+
 	for(int i = 0; i < nJoints; i++){
-		if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
-			if(aux){
-				if(jointState_.name[i].find("right_back") != std::string::npos)
-					jointState_.position[i] = .9;
-				else if(jointState_.name[i].find("left_back") != std::string::npos)
-					jointState_.position[i] = -.28;
-			}else{
-				if(jointState_.name[i].find("right_back") != std::string::npos)
-					jointState_.position[i] = .28;
-				else if(jointState_.name[i].find("left_back") != std::string::npos)
-					jointState_.position[i] = -.9;
-			}
+		if(jointState_.name[i].find("_shoulder_hinge") != std::string::npos){
+
+			jointState_.position[i] = 0;
+
+		}else if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
+			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("left_front") != std::string::npos)
+				if(state)
+					jointState_.position[i] -= -.28*d;
+				else
+					jointState_.position[i] += -.28*d;
+			else
+				if(state)
+					jointState_.position[i] -= .28*d;
+				else
+					jointState_.position[i] += .28*d;
 		}else if(jointState_.name[i].find("_leg_elbow") != std::string::npos){
-			if(aux){
-				if(jointState_.name[i].find("right_back") != std::string::npos)
-					jointState_.position[i] = -1.57;
-				else if(jointState_.name[i].find("left_back") != std::string::npos)
-					jointState_.position[i] = .6;
-			}else{
-				if(jointState_.name[i].find("right_back") != std::string::npos)
-					jointState_.position[i] = -.6;
-				else if(jointState_.name[i].find("left_back") != std::string::npos)
-					jointState_.position[i] = 1.57;
-			}
+			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("left_front") != std::string::npos)
+				if(state)
+					jointState_.position[i] -= .6*d;
+				else
+					jointState_.position[i] += .6*d;
+			else
+				if(state)
+					jointState_.position[i] -= -.6*d;
+				else
+					jointState_.position[i] += -.6*d;
 		}
 	}
 
+
 	return jointState_;
 }
-
 
 std::vector<std::vector<float>> sinWalking(float instant, std::vector<std::vector<float>> currentPoint){
 //returns the foot position in function of time variable
@@ -1149,10 +1214,11 @@ std::vector<std::vector<float>> sinWalking(float instant, std::vector<std::vecto
 				// std::cout << diff << std::endl;
 				// if(diff > 0)
 				// 	x += diff/10;
-				if(i == 1 || i == 2)
-					x += .0009;
-				else
-					x += .0014;
+
+				// if(i == 1 || i == 2)
+				// 	x += .0009;
+				// else
+				// 	x += .0014;
 			}
 		}
 
@@ -1162,6 +1228,49 @@ std::vector<std::vector<float>> sinWalking(float instant, std::vector<std::vecto
 
 	return point;
 
+}
+
+// -------------------------- Cargo -------------------------------------------\\
+
+// float integration(std::vector<float> x){
+// 	int i = 0;
+// 	float sum = 0;
+// 	while(i < x.size()){
+// 		i++;
+// 		sum += 2*x[i];
+// 	}
+// 	sum += x[0] + x[i-1];
+// 	float result = sum*.5;
+// 	return result;
+// }
+
+void minQuadRecursivo(std::vector<float> x, float acc, int n){
+	if(n == 0){
+		P = matrixNumberMultiDiv(createIdent(2), 1000, true);
+		theta = {0, 0};
+	}
+
+	// ROS_INFO("----------- Iteration: %d ------------", n);
+	// ROS_INFO("x: %f %f", x[0], x[1]);
+	// ROS_INFO("Theta: %f %f", theta[0], theta[1]);
+
+	// ROS_INFO("P: %f %f; %f %f", P[0][0], P[0][1], P[1][0], P[1][1]);
+
+	float e = -acc -(dot(x, theta));
+	// ROS_INFO("e: %f", e);
+	std::vector<float> k = vectorNumberMultiDiv(matrixArrayMulti(P, x),(LAMBDA + dot(matrixArrayMulti(x, P), x)), false);
+	// ROS_INFO("k: %f %f", k[0], k[1]);
+	theta = vectorSumSub(theta, vectorNumberMultiDiv(k, e, true), true);
+	// ROS_INFO("Theta: %f %f", theta[0], theta[1]);
+	P = matrixNumberMultiDiv(matrixSumSub(P, matrixMulti(vectorMulti(k, x), P), false), LAMBDA, false);
+	// ROS_INFO("P: %f %f; %f %f", P[0][0], P[0][1], P[1][0], P[1][1]);
+
+}
+
+float ressonanceFreq(std::vector<float> theta){
+	float frequency = sqrt(theta[1]);
+
+	return frequency;
 }
 
 
@@ -1183,8 +1292,10 @@ int main(int argc, char** argv){
 
 	//creating the publishers that will send our info back to ROS server
 	std::vector<ros::Publisher> jointPub(nJoints);
-	ros::Publisher legFrequencyStart = n.advertise<std_msgs::String>("/quadrupedal_test/flag", 1000);
+	ros::Publisher springPub = n.advertise<std_msgs::Float64>("/quadrupedal_test/spring_controller/command", 1000);
 
+	ros::Publisher kiPub = n.advertise<std_msgs::Float64>("/ki", 1);
+	ros::Publisher biPub = n.advertise<std_msgs::Float64>("/bi", 1);
 	//preparing the global state variable
 	jointState.name.resize(nJoints);
 	jointState.position.resize(nJoints);
@@ -1194,43 +1305,43 @@ int main(int argc, char** argv){
 
 	//assign each publisher to a joint
 	for(int i = 0; i < nJoints; i++)
-		jointPub[i] = n.advertise<std_msgs::Float64>("/quadrupedal_test/" + jointName[i] + "_controller/command", 5);
+		jointPub[i] = n.advertise<std_msgs::Float64>("/quadrupedal_test/" + jointName[i] + "_controller/command", 1000);
 	
+
+
 	//create the subscriber and subscribes to the joint_states topic
 	ros::Subscriber sub = n.subscribe("/quadrupedal_test/joint_states", 1, jointCallback);
-	
+	ros::Subscriber cargoDataSub = n.subscribe("/imu_data_cargo", 1, cargoIMUCallBack);
+	ros::Subscriber robotDataSub = n.subscribe("/imu_data_robot", 1, robotIMUCallBack);
+	ros::Subscriber cargoP3dSub = n.subscribe("/p3d_cargo", 1, cargoP3dCallBack);
+	ros::Subscriber robotP3dSub = n.subscribe("/p3d_robot", 1, robotP3dCallBack);
+
 	//set a rate to control the loop
 	ros::Rate r(RATE);
 	
-	//get the robot name from ROSPARAM | not needed right now
-	// std::string robot_desc_string;
-	// n.param("robot_description", robot_desc_string, std::string());
 
 
 	//======================= Testing Variables ===============================\\
 	//can get very messy
 
-	// sensor_msgs::JointState crouchState = crouch(jointName);
-	// std::vector<std::vector<float>> footPos;
 	std::vector<std::vector<float>> objPoint;
 	std::vector<std::vector<float>> currentPoint;
 
-	
-	std::stringstream ss;
-	ss << "start";
-	std_msgs::String legMsg;
-	legMsg.data = ss.str();
+	std::vector<float> x;
+	int it = 0;
+	int minQuadIt = 0;
+	int stateIt = 0;
+	float f;
+	float actingFrequency = 3;
+
+	float stateInterval = RATE/(actingFrequency*2);
 	
 	//---------------------------------------------------------
 	
-	bool stance = true;
+	bool state = true;
 	sensor_msgs::JointState testeState = crouch(jointName);
 
-	//printJointState(testeState);
-
-	//forwardCinematicQ(testeState);
-
-	//testeState.position[2] = -.9;
+	std_msgs::Float64 msg;
 
 	//======================= The Magic Happens Here ==========================\\
 
@@ -1239,41 +1350,80 @@ int main(int argc, char** argv){
 
 	while(ros::ok()){
 
+		// ROS_INFO("Robot Pos: %f, Vel: %f, Acc: %f \n Cargo POs: %f, Vel: %f, Acc: %f", robotPose[2], robotVel_z, robotAcc_z, cargoPose[2], cargoVel_z, cargoAcc_z);
+
+
 		// starts the walking sequence after 5 seconds of loop
 		if(ros::Time::now().toSec() - startingLoop.toSec() >= 5){
-			// std::cout << ros::Time::now().toSec() - startingLoop.toSec() << std::endl;
+			if(it % 10 == 0){
+				x = {cargoVel_z - robotVel_z, cargoPose[2]-robotPose[2]};
 
-			currentPoint = forwardCinematic(testeState);
+				minQuadRecursivo(x, cargoAcc_z, minQuadIt);
+				minQuadIt++;
 
-			objPoint = sinWalking(((float) ros::Time::now().toSec()) - ((float) startingLoop.toSec()) - 5, currentPoint);
+				// ROS_INFO("It: %d", minQuadIt);
 
-			// std::cout << objPoint[1][0] << std::endl;
-			// std::cout << objPoint[1][1] << std::endl;
-			// std::cout << objPoint[1][2] << std::endl;
+				ROS_INFO("Theta: %f %f", theta[0], theta[1]);
+
+				f = ressonanceFreq(theta);
+
+				ROS_INFO("Frequency: %f", f);
+
+				msg.data = theta[0];
+				biPub.publish(msg);
+
+				msg.data = theta[1];
+				kiPub.publish(msg);
+			}
 			
-			testeState = inverseCinematic(jointPub, r, testeState, objPoint);
 
-			// break;
+		// 	//currentPoint = forwardCinematic(testeState);
+
+		// 	//objPoint = sinWalking(((float) ros::Time::now().toSec()) - ((float) startingLoop.toSec()) - 5, currentPoint);
+			
+		// 	testeState = inverseCinematic(jointPub, r, testeState, objPoint);
+			// ROS_INFO("%d %f", stateIt, stateInterval);
+			if(stateIt == (int)stateInterval){
+				// ROS_INFO("entrou");
+				stateIt = 0;
+				if(state)
+					state = false;
+				else
+					state = true;
+			}
+				
+
+			//std::cout << state << std::endl;
+			testeState = showOff(testeState, 2*actingFrequency, state);
+
+
+			if(it < 1000)
+				it++;
+			else
+				it = 0;
+			stateIt++;
+			
 		}
-
-		
-
 
 		//starts publishing only after the first joint state message was received
-		if(jointState.header.seq != 0){
-			for(int i = 0; i < nJoints; i++){
-				std_msgs::Float64 msg;
-				msg.data = testeState.position[i];
-				//msg.data = -.9;
-				jointPub[i].publish(msg);
-			}
+		//if(jointState.header.seq != 0){
+		for(int i = 0; i < nJoints; i++){
+			msg.data = testeState.position[i];
+			//msg.data = -.9;
+			jointPub[i].publish(msg);
 		}
+
+		msg.data = 1;
+		springPub.publish(msg);
+		//}
+
+		
 
 		//controls the subscriber, asks for new messages to be received
 		ros::spinOnce();
 		//sleeps the necessary time to respect the specified rate value
 		r.sleep();
-
+		
 	}
 
 }

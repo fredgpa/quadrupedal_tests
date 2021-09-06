@@ -1,3 +1,9 @@
+/*============================= AUTHORS =======================================\\
+Frederico Gomes Pires Azzolini, frederico.azzolini@usp.br
+Lucas da Silva Rigobello, lucasrigobello@usp.br
+//=============================================================================*/
+
+
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -10,6 +16,7 @@
 
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
+#include "nav_msgs/Odometry.h"
 #include "std_msgs/String.h"
 
 //=========================== VARIABLES =======================================\\
@@ -17,7 +24,7 @@
 //--------------------------- Constants ---------------------------------------\\
 
 #define PI 3.14159
-#define RATE 1000
+#define RATE 10000
 #define F_ROT 2*PI
 
 //--------------------------- ROBOT PARAMETERS --------------------------------\\
@@ -55,10 +62,9 @@ std::vector<std::string> jointName= {"left_front_leg_shoulder_rotate", "right_fr
 //--------------------------- Variable to receive robot info ------------------\\
 
 sensor_msgs::JointState jointState;
-std::string TrbMoving;
-std::string TrfMoving;
-std::string TlfMoving;
-std::string TlbMoving;
+
+//nav_msgs::Odometry p3dGlobal
+std::vector<float> p3dGlobal(3);
 
 //=============================================================================\\
 //=========================== FUNCTIONS =======================================\\
@@ -80,39 +86,25 @@ void jointCallback(const sensor_msgs::JointState::ConstPtr &_js){
 	}
 }
 
-void legCallbackTrb(const std_msgs::String::ConstPtr& msg){
 
-	TrbMoving = msg->data.c_str();
+void p3dCallback(const nav_msgs::Odometry::ConstPtr &_js){
+//translates ROS /p3d_robot/pose/pose/position message to the global variable
 
-}
-
-void legCallbackTrf(const std_msgs::String::ConstPtr& msg){
-
-	TrfMoving = msg->data.c_str();
-
-}
-
-void legCallbackTlf(const std_msgs::String::ConstPtr& msg){
-
-	TlfMoving = msg->data.c_str();
-
-}
-
-void legCallbackTlb(const std_msgs::String::ConstPtr& msg){
-
-	TlbMoving = msg->data.c_str();
+	p3dGlobal[0]= _js->pose.pose.position.x;
+	p3dGlobal[1]= _js->pose.pose.position.y;
+	p3dGlobal[2]= _js->pose.pose.position.z;
 
 }
 
 void printJointState(sensor_msgs::JointState jointState_){
 //prints data on joint state variable
-
-	for(int i = 0; i < nJoints; i++){
+	int i=6;
+	//for(int i = 0; i < nJoints; i++){
 		std::cout << "Joint Name: " <<std::endl;
 		std::cout << jointState_.name[i] <<std::endl;
 		std::cout << "Joint Position: " <<std::endl;
 		std::cout << jointState_.position[i] <<std::endl;
-	}
+	//}
 }
 
 // -------------------------- Movement Templates ------------------------------\\
@@ -132,15 +124,15 @@ sensor_msgs::JointState crouch(std::vector<std::string> jointName){
 			jointState_.position[i] = 0;
 
 		}else if(jointState_.name[i].find("_shoulder_rotate") != std::string::npos){
-			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("left_front") != std::string::npos)
-				jointState_.position[i] = -.28;
+			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("right_front") != std::string::npos)
+				jointState_.position[i] = -3.14159/6;
 			else
-				jointState_.position[i] = .28;			
+				jointState_.position[i] = 3.14159/6;			
 		}else if(jointState_.name[i].find("_leg_elbow") != std::string::npos){
-			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("left_front") != std::string::npos)
-				jointState_.position[i] = .6;
+			if(jointState_.name[i].find("right_back") != std::string::npos || jointState_.name[i].find("right_front") != std::string::npos)
+				jointState_.position[i] = 2*3.14159/6;
 			else
-				jointState_.position[i] = -.6;
+				jointState_.position[i] = -2*3.14159/6;
 		}
 	}
 
@@ -198,71 +190,136 @@ sensor_msgs::JointState showOff(sensor_msgs::JointState jointState_, bool aux){
 }
 
 
-std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vector<float>> currentPoint){
+std::vector<std::vector<float>> sinWalking(double instant, std::vector<std::vector<float>> zoc, std::vector<std::vector<float>> currentPoint){
 //returns the foot position in function of time variable
 	std::vector<std::vector<float>> point(nLegs);
-	//2.1 segundos uma passada completa
-	// std::vector<float> legTiming = {4*.167, 0, 2*.167, 6*.167};
-	std::vector<float> legTiming = { 2*PI/15, 0, PI/5, PI/15};
+	//std::vector<float> legTiming = {0, 3.14159, 3.14159/2, 3*3.14159/4};
 
-	float x;
-	float y;
 	float z;
+	float vc1; // controle do gait
+	float vc2; // controle do passo	
+	float fgait;
+	float fpasso;
+	float Hpasso;
+	float Lpasso;
+	float xpasso1;
+	float xpasso2;
+	int pg[4]={1, 3, 2, 0}; //padrao do gait, ex:[0 1 3 2]
+	float x1;
+	float x2;
 
-	std::vector<bool> legFirst = {true, true, true, true};
+	fpasso = 1; // Passo / por segundo * por 4 patas
+	fgait = fpasso/2; //
+	Hpasso = 0.2;
+	Lpasso = 0.2; 
+	x1=-0.7+p3dGlobal[0];
+	x2=0.3+p3dGlobal[0];
+	float x[4]={x1, x2, x2, x1};
 
-	std::vector<float> instantLegs = {instant-legTiming[0], instant-legTiming[1], instant-legTiming[2], instant-legTiming[3]};
-
-	// std::cout << instantLegs[1] << std::endl;
-
-	for(int i = 0; i < nLegs; i++){
-		// std::cout << instant << std::endl;
-
-		x = currentPoint[i][0];//calculate z
-		y = currentPoint[i][1];
-		z = currentPoint[i][2];
-
-		if(instant >= legTiming[i]){
-
-			if(lastStep[i] == 0){
-				
-				z = sin((instantLegs[i])*10)*.6;
-					
-				if((instantLegs[i]) >= PI/8)
-					lastStep[i] = (instantLegs[i]);
-			}else if((instantLegs[i]) >= lastStep[i] + PI/6){
-
-				z = (sin(instantLegs[i] - lastStep[i] - PI/6)*10)*.6;
-
-				if((instantLegs[i]) >= lastStep[i] + PI/5)
-					lastStep[i] = (instantLegs[i]);
-
-			}else
-				z = 0;
-
-			// std::cout << z << std::endl;
-			// std::cout << "-------------------------------" << std::endl;
-
-			if(z <= 0)
-				z = 0;
-			else{
-				if(z > .2)
-					z = .2;
-
-					// if( i == 1 || i == 2)
-						x += .0009;
-					// else
-						// x -= .02;
-					// else
-				 // 		x -= .1;
-
-			}
-		}
-
-
-		point[i] = {x, y, z};
+//-------------------------------------------------------------------------------------------------------	 
+	//Path 1 - Simples Patas diagonais opostas movimenta juntas
+/*	
+	vc1 = sin(2*3.14159*fpasso*instant)*Hpasso;
+	//vc2 = 0.1+sin(2*3.14159*fpasso*instant-3.14159)*Hpasso/2;
+	xpasso1=sin(2*3.14159*fpasso*instant+3.14159/2)*Lpasso/2;
+	//xpasso2=sin(2*3.14159*fpasso*instant-3.14159)*Lpasso;
+	if(vc1>0){
+	point[pg[0]] = {x[pg[0]]-xpasso1, currentPoint[pg[0]][1], vc1+zoc[pg[0]][2]};
+	point[pg[1]] = {x[pg[1]]+xpasso1, currentPoint[pg[1]][1], 0+zoc[pg[1]][2]};
+	point[pg[2]] = {x[pg[2]]+xpasso1, currentPoint[pg[2]][1], 0+zoc[pg[2]][2]};
+	point[pg[3]] = {x[pg[3]]-xpasso1, currentPoint[pg[3]][1], vc1+zoc[pg[3]][2]};
+	}else if(vc1<0){
+	point[pg[0]] = {x[pg[0]]-xpasso1, currentPoint[pg[0]][1], 0+zoc[pg[0]][2]};
+	point[pg[1]] = {x[pg[1]]+xpasso1, currentPoint[pg[1]][1], zoc[pg[1]][2]-vc1};
+	point[pg[2]] = {x[pg[2]]+xpasso1, currentPoint[pg[2]][1], zoc[pg[2]][2]-vc1};
+	point[pg[3]] = {x[pg[3]]-xpasso1, currentPoint[pg[3]][1], 0+zoc[pg[3]][2]};
+	
 	}
+	*/
 
+//-------------------------------------------------------------------------------------------------------
+	// Path 2 - Movimento em quatro instantes separadamente para cada pata (movimento com pausa)
+	
+	float vc3;
+	vc1 = sin(2*3.14159*fgait*instant);
+	vc2 = sin(2*3.14159*fpasso*instant);
+	vc3 = sin(2*3.14159*fgait*instant-3.14159/2);
+	xpasso1=vc1*Lpasso;
+	xpasso2=sin(2*3.14159*fgait*instant-3.14159/2)*Lpasso;
+
+		if(vc1>=0 && vc2>=0){
+			z=vc1*Hpasso;
+			point[pg[0]] = {x[pg[0]]+xpasso1, currentPoint[pg[0]][1], z+zoc[pg[0]][2]};
+			point[pg[1]] = {x[pg[1]], currentPoint[pg[1]][1], zoc[pg[1]][2]};
+			point[pg[2]] = {x[pg[2]]+Lpasso-xpasso1, currentPoint[pg[2]][1], zoc[pg[2]][2]};
+			point[pg[3]] = {x[pg[3]]+Lpasso, currentPoint[pg[3]][1], zoc[pg[3]][2]};
+		}else if(vc1>=0 && vc2<=0){
+			z=vc3*Hpasso;
+			point[pg[0]] = {x[pg[0]]+Lpasso, currentPoint[pg[0]][1], zoc[pg[0]][2]};
+			point[pg[1]] = {x[pg[1]]+xpasso2, currentPoint[pg[1]][1], z+zoc[pg[1]][2]};
+			point[pg[2]] = {x[pg[2]], currentPoint[pg[2]][1], zoc[pg[2]][2]};
+			point[pg[3]] = {x[pg[3]]+Lpasso-xpasso2, currentPoint[pg[3]][1], zoc[pg[3]][2]};
+		}else if(vc1<=0 && vc2>=0){
+			z=-vc1*Hpasso;
+			point[pg[0]] = {x[pg[0]]+Lpasso+xpasso1, currentPoint[pg[0]][1], zoc[pg[0]][2]};
+			point[pg[1]] = {x[pg[1]]+Lpasso, currentPoint[pg[1]][1], zoc[pg[1]][2]};
+			point[pg[2]] = {x[pg[2]]-xpasso1, currentPoint[pg[2]][1], z+zoc[pg[2]][2]};
+			point[pg[3]] = {x[pg[3]], currentPoint[pg[3]][1], zoc[pg[3]][2]};
+		}else if(vc1<=0 && vc2<=0){
+			z=-vc3*Hpasso;
+			point[pg[0]] = {x[pg[0]], currentPoint[pg[0]][1], zoc[pg[0]][2]};
+			point[pg[1]] = {x[pg[1]]+Lpasso+xpasso2, currentPoint[pg[1]][1], zoc[pg[1]][2]};
+			point[pg[2]] = {x[pg[2]]+Lpasso, currentPoint[pg[2]][1], zoc[pg[2]][2]};
+			point[pg[3]] = {x[pg[3]]-xpasso2, currentPoint[pg[3]][1], z+zoc[pg[3]][2]};
+		}
+		
+
+//-------------------------------------------------------------------------------------------------------
+	// Path 3 - Movimento em quatro instantes separadamente para cada pata (movimento contínuo)
+	/*
+	float z1;
+	float z2;
+
+	z1 = sin(2*3.14159*fgait*instant)*Hpasso;
+	z2 = sin(2*3.14159*fgait*instant-3.14159/2)*Hpasso;
+	
+	vc1 = sin(2*3.14159*fgait*instant);
+	vc2 = sin(2*3.14159*fpasso*instant);
+	xpasso1=vc1*Lpasso;
+	xpasso2=sin(2*3.14159*fgait*instant-3.14159/2)*Lpasso;
+
+		if(vc1>=0 && vc2>=0){
+			z=vc2*Hpasso;
+			point[pg[0]] = {x[pg[0]]+Lpasso, currentPoint[pg[0]][1], z1+zoc[pg[0]][2]};
+			point[pg[1]] = {x[pg[1]], currentPoint[pg[1]][1], zoc[pg[1]][2]};
+			point[pg[2]] = {x[pg[2]]+Lpasso/2, currentPoint[pg[2]][1], zoc[pg[2]][2]};
+			point[pg[3]] = {x[pg[3]]+Lpasso, currentPoint[pg[3]][1], zoc[pg[3]][2]-z2};
+		}else if(vc1>=0 && vc2<=0){
+			z=-vc2*Hpasso;
+			point[pg[0]] = {x[pg[0]]+Lpasso, currentPoint[pg[0]][1], z1+zoc[pg[0]][2]};
+			point[pg[1]] = {x[pg[1]]+Lpasso, currentPoint[pg[1]][1], z2+zoc[pg[1]][2]};
+			point[pg[2]] = {x[pg[2]], currentPoint[pg[2]][1], zoc[pg[2]][2]};
+			point[pg[3]] = {x[pg[3]]+Lpasso/2, currentPoint[pg[3]][1], zoc[pg[3]][2]};
+		}else if(vc1<=0 && vc2>=0){
+			z=vc2*Hpasso;
+			point[pg[0]] = {x[pg[0]]+Lpasso/2, currentPoint[pg[0]][1], zoc[pg[0]][2]};
+			point[pg[1]] = {x[pg[1]]+Lpasso, currentPoint[pg[1]][1], z2+zoc[pg[1]][2]};
+			point[pg[2]] = {x[pg[2]]+Lpasso, currentPoint[pg[2]][1], zoc[pg[2]][2]-z1};
+			point[pg[3]] = {x[pg[3]], currentPoint[pg[3]][1], zoc[pg[3]][2]};
+		}else if(vc1<=0 && vc2<=0){
+			z=-vc2*Hpasso;
+			point[pg[0]] = {x[pg[0]], currentPoint[pg[0]][1], zoc[pg[0]][2]};
+			point[pg[1]] = {x[pg[1]]+Lpasso/2, currentPoint[pg[1]][1], zoc[pg[1]][2]};
+			point[pg[2]] = {x[pg[2]]+Lpasso, currentPoint[pg[2]][1], zoc[pg[2]][2]-z1};
+			point[pg[3]] = {x[pg[3]]+Lpasso, currentPoint[pg[3]][1], zoc[pg[3]][2]-z2};
+		}
+		*/
+		//double tit
+		//tit=ros::Time::now().toSec();
+		//ROS_INFO("px:%f", point[0][0]);
+		//ROS_INFO("tx:%f", point[0][0]);
+
+	
 	return point;
 
 }
@@ -660,7 +717,7 @@ std::vector<float> QConjugate(std::vector<float> q){
 
 //--------------------------- Robot Cinematic ---------------------------------\\
 
-std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointState_){
+std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointState_, float zmo){
 //calculates the point of each foot based on the radians of each joint
 	// std::vector<float> theta1 = {0, 0, 0, 0};
 	// std::vector<float> theta2 = {0, 0, 0, 0};
@@ -699,7 +756,7 @@ std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointSt
  	std::vector<std::vector<float>> matrixAux(nLegs, std::vector<float>(nLegs, 0.0));
  	matrixAux[0][3] = xm;
  	matrixAux[1][3] = ym;
- 	matrixAux[2][3] = zm;
+ 	matrixAux[2][3] = zmo;
  	matrixAux[3][3] = 0;
 
 	std::vector<std::vector<float>> Tm = matrixSumSub(matrixMulti(Rxyz, createIdent(nLegs)),matrixAux, true);
@@ -824,7 +881,7 @@ std::vector<std::vector<float>> forwardCinematic(sensor_msgs::JointState jointSt
 	return Patas;
 }
 
-sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, ros::Rate r, sensor_msgs::JointState jointState_, std::vector<std::vector<float>> objPoint){//sensor_msgs::JointState jointState_){
+sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, ros::Rate r, sensor_msgs::JointState jointState_, std::vector<std::vector<float>> objPoint, std::vector<std::vector<float>> currentPoint, float zmo, double deltat, double instant2){//sensor_msgs::JointState jointState_){
 //calculates the trajectory of each joint to reach the objective point
 
 	// std::vector<float> theta1 = {0, 0, 0, 0};
@@ -837,7 +894,12 @@ sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, r
 	
 
 	std::vector<std::vector<float>> dx = objPoint;
-
+	for(int i = 0; i < nLegs; i++){
+		dx[i] = {objPoint[i][0]-currentPoint[i][0], objPoint[i][1]-currentPoint[i][1], objPoint[i][2]-currentPoint[i][2]};
+	}
+	ROS_INFO("dx:%f", dx[0][0]);
+	ROS_INFO("antig:%f", currentPoint[0][0]);
+	ROS_INFO("atual:%f", objPoint[0][0]);
 	
 	//calculation initiates------------------------------
 	//body rotation matrix
@@ -868,7 +930,7 @@ sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, r
  	std::vector<std::vector<float>> matrixAux(nLegs, std::vector<float>(nLegs, 0.0));
  	matrixAux[0][3] = xm;
  	matrixAux[1][3] = ym;
- 	matrixAux[2][3] = zm;
+ 	matrixAux[2][3] = zmo;
  	matrixAux[3][3] = 0;
 
 	std::vector<std::vector<float>> Tm = matrixSumSub(matrixMulti(Rxyz, createIdent(nLegs)),matrixAux, true);
@@ -921,9 +983,6 @@ sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, r
 
 	std::vector<std::vector<float>> Theta(4);
 
-	// while
-	if(sumMatrix(elementWiseMatrixMultiplication(dx,dx)) >= .005){
-
 		for(int i = 0; i < nLegs; i++){
 
 			float t1 = theta1[i];
@@ -970,14 +1029,27 @@ sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, r
 			J_ = invertMatrix(J_);
 
 
-			dtheta = matrixArrayMulti(J_, vectorNumberMultiDiv(dx[i],0.01, true));
+			dtheta = matrixArrayMulti(J_, dx[i]);
 
-			Theta[i] = vectorSumSub({t1, t2, t3}, dtheta, true);
+			Theta[i] = vectorSumSub({t1, t2, t3}, vectorNumberMultiDiv(dtheta, 1, true), true);
+			//Theta[i] = vectorSumSub({t1, t2, t3},dtheta, true);
 
 			t1 = Theta[i][0];
 			t2 = Theta[i][1];
 			t3 = Theta[i][2];
+       		//std::stringstream ss;
+		//ss << "t1 " << t1<< "t1 " <<t2<< "t1 " <<t3;
+		//%msg.data = ss.str();
+		if(i==0){
+		//double tit
+		//tit=ros::Time::now().toSec();
+		ROS_INFO("dtheta:%f", dtheta[2]);	
+		ROS_INFO("t3:%f", t3);
+		ROS_INFO("DeltaT:%f", deltat);
+		ROS_INFO("Time:%f", instant2);
+		//ROS_INFO("t:%f", dtheta[2]);
 
+		}
 		}
 
 		for(int i = 0; i < nLegs; i++){
@@ -1010,7 +1082,6 @@ sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, r
 		// //sleeps the necessary time to respect the specified rate value
 		// r.sleep();
 
-	}
 
 	// std::cout << "Theta Leg 1: " << std::endl;
 	// std:: cout << Theta[0][0] << std::endl;
@@ -1034,11 +1105,10 @@ sensor_msgs::JointState inverseCinematic(std::vector<ros::Publisher> jointPub, r
 	// std::cout << "---------" << std::endl;
 
 
-
 	return jointState_;
 }
 
-std::vector<float> forwardCinematicQ(sensor_msgs::JointState jointState_){
+std::vector<float> forwardCinematicQ(sensor_msgs::JointState jointState_, float zmo){
 //calculates the point of each foot based on the radians of each joint
 
 	std::vector<float> theta1 = {0, 0, 0, 0};
@@ -1084,7 +1154,7 @@ std::vector<float> forwardCinematicQ(sensor_msgs::JointState jointState_){
 		float t1 = theta1[i];
 		float t2 = theta2[i];
 		float t3 = theta3[i];
-		std::vector<float> p0 = {0, 0, 0, 0, 0, xm, ym, zm};
+		std::vector<float> p0 = {0, 0, 0, 0, 0, xm, ym, zmo};
 		std::vector<float> pe = {1, 0, 0, 0, 0, 0, 0, 0};
 
 
@@ -1142,11 +1212,8 @@ std::vector<float> forwardCinematicQ(sensor_msgs::JointState jointState_){
  
 	}
 
-
-
 	return Ppata[0];
 }
-
 
 
 
@@ -1199,6 +1266,8 @@ int main(int argc, char** argv){
 	// std::vector<std::vector<float>> footPos;
 	std::vector<std::vector<float>> objPoint;
 	std::vector<std::vector<float>> currentPoint;
+	std::vector<std::vector<float>> zoc;
+	float zmo;
 
 	
 	std::stringstream ss;
@@ -1221,26 +1290,51 @@ int main(int argc, char** argv){
 
 	//timing variables
 	ros::Time startingLoop = ros::Time::now();
-
-
-
+	bool aux_control = true;
+	bool aux_control2 = true;
+	double instant1;
+	double instant2;
+	double deltat;
+	
+	instant1=0;
+	instant2=0;
+	deltat=0;
+	int count = 0;
 	while(ros::ok()){
+		instant1=instant2;
+		instant2=ros::Time::now().toSec();
+		deltat=instant2-instant1;
+		std_msgs::String msg;
+   
+       		//std::stringstream ss;
+		//ss << "hello world " << deltat;
+		//msg.data = ss.str();
+		//ROS_INFO("%s", msg.data.c_str());
 
 		//starts the walking sequence after 5 seconds of loop
 		if(ros::Time::now().toSec() - startingLoop.toSec() >= 5){
 			// std::cout << ros::Time::now().toSec() - startingLoop.toSec() << std::endl;
 
 			legFrequencyStart.publish(legMsg);
-
-			currentPoint = forwardCinematic(testeState);
-
-			objPoint = sinWalking(ros::Time::now().toSec() - startingLoop.toSec() - 5, currentPoint);
-
-			// std::cout << objPoint[1][0] << std::endl;
-			// std::cout << objPoint[1][1] << std::endl;
-			// std::cout << objPoint[1][2] << std::endl;
 			
-			testeState = inverseCinematic(jointPub, r, testeState, objPoint);
+			while(aux_control2){
+				zmo=p3dGlobal[2];
+				aux_control2 = false;
+			}
+
+			currentPoint = forwardCinematic(testeState,zmo);
+			while(aux_control){
+				zoc=currentPoint;
+				aux_control = false;
+			}
+
+			objPoint = sinWalking(ros::Time::now().toSec() - startingLoop.toSec() - 5, zoc, currentPoint);
+
+			 //std::cout << objPoint[1][0] << std::endl;
+			 //std::cout << objPoint[1][1] << std::endl;
+			 //std::cout << objPoint[1][2] << std::endl;
+			
+			testeState = inverseCinematic(jointPub, r, testeState, objPoint, currentPoint,zmo,deltat,instant2);
 
 			// break;
 		}
@@ -1250,6 +1344,7 @@ int main(int argc, char** argv){
 
 		//starts publishing only after the first joint state message was received
 		if(jointState.header.seq != 0){
+			printJointState(testeState);
 			for(int i = 0; i < nJoints; i++){
 				std_msgs::Float64 msg;
 				msg.data = testeState.position[i];

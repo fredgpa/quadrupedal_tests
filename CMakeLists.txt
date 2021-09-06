@@ -13,8 +13,12 @@ find_package(catkin REQUIRED COMPONENTS
 	kdl_parser
 	trac_ik_lib
 	cv_bridge
+	nav_msgs
+	controller_manager
+  	joint_state_controller
+  	robot_state_publisher
 )
-find_package(OpenCV 4 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 find_package(Armadillo REQUIRED)
 
